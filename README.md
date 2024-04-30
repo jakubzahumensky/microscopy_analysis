@@ -9,21 +9,23 @@ For each cell/ROI, multiple paramers are quantified. As the *transversal (cross-
 - BR_date - date of biological replicate; extracted from the name of the folder 2 levels above the data folder (first 6 characters); consult Fig. 3 in the Protocol
 
 *extracted from the filename:*
-The names of these parameters are set as default in the *Naming scheme* field of the dialog window shown when the *Quantify* macro is run. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields is the same in the filenames and in the *Naming scheme* input. Here, the parameters are explained as an example for microscopy images of yeast cells. 
-- strain - 
-- medium
-- time
-- condition
-- frame
+
+The names of these parameters are set as default in the *Naming scheme* field of the dialog window shown when the *Quantify* macro is run. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields is the same in the filenames and in the *Naming scheme* input. Here, the parameters are explained as an example for microscopy images of yeast cells.
+
+- strain - strain of the used yeast
+- medium - medium in which the cells were cultivated
+- time - cultivation time
+- condition - how the cells were treated - control, heat stress, chemical treatment, etc.
+- frame - typically multiple frames are obtained from a single culture/sample
 
 *quantified from individual ROIs:*
-- mean_background
-- cell_no
-- cell_area
-- cell_I.integral
-- cell_I.mean
-- cell_I.SD
-- cell_I.CV
+- mean_background - mean intensity of the background of the image; assessed automatically by the macro
+- cell_no - each cell/ROI has a designated number; corresponds to the ones displayed using the ROI manager in Fiji when both the image and the ROI_Set is loaded
+- cell_area - corresponds to the area of the defined ROI
+- cell_I.integral - integrated (total) fluorescence intensity within a specified ROI
+- cell_I.mean - mean cellular intensity, i.e., integrated fluorescence intensity divided by the area of the ROI
+- cell_I.SD - standard deviation of the mean cellular intensity
+- cell_I.CV - coefficient of variation of the mean cellular intensity, calculated as SD/mean
 - major_axis
 - minor_axis
 - eccentricity
