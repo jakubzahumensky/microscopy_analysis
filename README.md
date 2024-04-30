@@ -72,3 +72,14 @@ The names of these parameters are set as default in the *Naming scheme* field of
 - **mean_foci_intensity** - 
 - **mean_foci_intensity_SD** - 
 - **protein_in_microdomains[%]** - 
+
+- **foci_profile_dotfind** - analogous to *foci_number*, but after local contrast enhancement performed by filtering the image using a custom-made matrix that enhances the high-intensity focu:
+```math
+\begin{bmatrix}
+  -1 & -1 & -1 & -1 & -1 \\
+  -1 & 0 & 0 & 0 & -1 \\
+  -1 & 0 & 16 & 0 & -1 \\
+  -1 & 0 & 0 & 0 & -1 \\
+  -1 & -1 & -1 & -1 & -1
+ \end{bmatrix}
+```
