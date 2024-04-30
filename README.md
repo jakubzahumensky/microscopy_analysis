@@ -1,6 +1,6 @@
 This repository contains **Fiji (ImageJ) macros for automatic analysis of microscopy images**. Their use is explained in detail in **Zahumensky & Malinsky bioRxiv preprint: https://doi.org/10.1101/2024.03.28.587214**
 
-# **Explanation of the Results table**  
+# **Explanation of the *Results table***  
 For each cell/ROI, multiple paramers are quantified. As the *transversal (cross-sectional)* and *tangential* images show principally different things, the parameters decribing then are inherently different. At the same time, some parameters are common for the two image types. In the list below, they are grouped accordingly, and ordered as they are in the respective *Results table* for easier orientation.
 
 ## **Common parameters**
@@ -15,23 +15,24 @@ The names of these parameters are set as default in the *Naming scheme* field of
 - **strain** - strain of the used yeast
 - **medium** - medium in which the cells were cultivated
 - **time** - cultivation time
-- **condition** - how the cells were treated** - control, heat stress, chemical treatment, etc.
+- **condition** - how the cells were treated - control, heat stress, chemical treatment, etc.
 - **frame** - typically multiple frames are obtained from a single culture/sample
 
 *quantified from individual ROIs:*
 - **mean_background** - mean intensity of the background of the image; assessed automatically by the macro
 - **cell_no** - each cell/ROI has a designated number; corresponds to the ones displayed using the ROI manager in Fiji when both the image and the ROI_Set is loaded
-- **cell_area** - corresponds to the area of the defined ROI
+- **cell_area** - corresponds to the area of the defined ROI made bigger by 0.166 $\mu m$
 - **cell_I.integral** - integrated (total) fluorescence intensity within a specified ROI
 - **cell_I.mean** - mean cellular intensity, i.e., integrated fluorescence intensity divided by the area of the ROI
 - **cell_I.SD** - standard deviation of the mean cellular intensity
-- **cell_I.CV** - coefficient of variation of the mean cellular intensity, calculated as SD/mean
-- **major_axis** - 
-- **minor_axis** - 
-- **eccentricity** - 
+- **cell_I.CV** - coefficient of variation of the mean cellular intensity, calculated as $SD/mean$
+- **major_axis** - the length of the major axis of the ellipse fitted to the respective ROI
+- **minor_axis** - the length of the minor axis of the ellipse fitted to the respective ROI
+- **eccentricity** - i.e., deviation from a perfect circle, of the ellipse fitted to the respective ROI; calculated as $\sqrt{1-(minor_{axis}/major_{axis})^2}$;
+
 
 ## **Parameters for *transversal* images**
-- **cytosol_area** - 
+- **cytosol_area** - the ROIs should be defined so that their edge is located in the middle of the plasma membrane (if the ROIs correspond to cells); for this parameter, the ROI is made smaller in all directions by 
 - **cytosol_I.integral** - 
 - **cytosol_I.mean** - 
 - **cytosol_I.SD** - 
