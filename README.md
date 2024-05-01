@@ -6,24 +6,20 @@ This repository contains **Fiji (ImageJ) macros for automatic analysis of micros
 
 The *Results table* header contains basic information about the run of the *Quantify* macro, so if the analysis is run multiple times, the changes in the results can be correlated with input parameters and macro version. Each line of the header starts with the pound (#) sign, so that it is automatically ignored by the provided scripts, both *bash* and *R*.
 
-
-### Common parameters
 - **Date and time** - date and time of when the macro was run in the YYYY-MM-DD HH:MM:SS format
 - **Macro version** - version of the *Quantify* macro that was used, specified in both the macro file name and in the actual macro code, under the *version* variable (at/around line 35)
 - **Channel** - specifies which channel of the fluorescence microscopy images was selected for quantification
-- **Cell (ROI) size interval** - gives the range of sizes (areas) of the cells (ROIs) that were quantified; default is 5 $\mu m^2$-Infinity
+- **Cell (ROI) size interval** - gives the range of sizes (areas) of the cells (ROIs) that were quantified; default is from 5 $\mu m^2$ to infinity
 - **Coefficient of variance threshold** - reports what threshold was used to automatically discard cells based on the coefficient of variation of their mean fluorescence intensity; the idea is that the fluorescence of dead cells is quite uniform; the default value is 0; should be used with caution
-
-### Parameters for *transversal* images
-- **Smoothing factor (Gauss):** - the images are pre-processed before the analysis using a *Gaussian filter* to smooth out noise; the default value is 1
-- **Patch prominence** - designates how bright high-intensity foci need to be relative to their surroundings to be reported by the *foci_number* (see below); the value is set semi-empirically within the code to 1.666
+- **Smoothing factor (Gauss)** *(transversal images only)* - the images are pre-processed before the analysis using a *Gaussian filter* to smooth out noise; the default value is 1
+- **Patch prominence** *(transversal images only)* - designates how bright high-intensity foci need to be relative to their surroundings to be reported by the *foci_number* (see below); the value is set semi-empirically within the code to 1.666
 
 
 ## **Quantification parameters**
 
 For each cell/ROI, multiple parameters are quantified. As the *transversal (cross-sectional)* and *tangential* images show principally different things, the parameters describing then are inherently different. At the same time, some parameters are common for the two image types. In the list below, they are grouped accordingly, and ordered as they are in the respective *Results table* for easier orientation. Note that all reported intensity values are background-corrected.
 
-### **Common parameters**
+### Common parameters
 ***extracted from the name of folders:***
 
 - **exp_code** - experimental code; extracted from the name of the folder 3 levels above the data folder, based on used input in the dialog window shown when the *Quantify* macro is run; consult Fig. 3 in the Protocol
@@ -55,7 +51,7 @@ The names of these parameters are set as default in the *Naming scheme* field of
 - **eccentricity** - i.e., deviation from a perfect circle, of the ellipse fitted to the respective ROI; calculated as $\sqrt{1-(axis_{minor}/axis_{major})^2}$
 
 
-### **Parameters for *transversal* images**
+### Parameters for *transversal* images
 - **cytosol_area** - the ROIs should be defined so that their edge is located in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cell area, the ROI is made *smaller* by 0.166 $\mu m$ in each direction
 - **cytosol_I.integral** - integrated (total) fluorescence intensity within a specified ROI made *smaller* by 0.166 $\mu m$ in each direction
 - **cytosol_I.mean** - mean cytosol intensity, i.e., integrated fluorescence intensity divided by the *cytosol area*
@@ -89,7 +85,7 @@ The names of these parameters are set as default in the *Naming scheme* field of
 - **foci_from_watershed** and **foci_density_from_watershed** - analogous to *foci_number* and *foci_density*, but after binarization of the image using the *Watershed Segmentation* plugin developed by *EPFL* (http://bigwww.epfl.ch/sage/soft/watershed), with following settings: blurring='0.0' watershed='1 1 0 255 1 0' display='2 0'
 - **protein_in_microdomains[%]** - integral intensity-based estimate of how much of the fluorescent protein in the plasma membrane localizes to microdomains (high-intensity foci)
 
-### **Parameters for *tangential* images**
+### Parameters for *tangential* images
 - **foci_density(find_maxima)** - areal density of high-intensity foci in the plasma membrane, detected using the in-built *Find maxima* Fiji plugin (with *prominence* set to 1.666 and *exclude on edges* activated), i.e., $number_{foci}/length_{PM}$, where $length_{PM}$ corresponds to the circumference of the respective ROI
 - **foci_density(analyze_particles)** - areal density of high-intensity foci in the plasma membrane, using the *Analyze particles* plugin and taking objects with area between 5 and 120 pixels. The image of respective cell (ROI) is first binarized using adaptive thresholding. From the objects at the ROI boundary, only those touching the lower and right "edges" are counted (analogous to how a Bruker chamber is used to count cells in a suspension)
 - **area_fraction(foci_vs_ROI)** - total area of objects reported in *foci_density(analyze_particles)* divided by the area of the ROI, i.e., $area_{particles}/area_{ROI}$; gives an estimate of how much of the plasma membrane is covered with the studied microdomains
