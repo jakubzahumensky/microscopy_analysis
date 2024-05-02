@@ -36,6 +36,7 @@ For each cell/ROI, multiple parameters are quantified. While some parameters are
 #### extracted from the file name:
 
 The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields is the same in the file names and the *Naming scheme* input. Here, the parameters are explained as an example for microscopy images of yeast cells.
+
 - **strain** - the strain of the used yeast
 - **medium** - medium in which the cells were cultivated
 - **time** - cultivation time
