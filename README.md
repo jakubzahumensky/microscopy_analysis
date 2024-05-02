@@ -33,7 +33,7 @@ For each cell/ROI, multiple parameters are quantified. While some parameters are
 - **BR_date** - date of biological replicate; extracted from the name of the folder 2 levels above the data folder (first 6 characters); consult Fig. 3 in the *Protocol*
 
 
-#### extracted from the file names: 
+#### extracted from the file names: \newline
 
 The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields is the same in the file names and the *Naming scheme* input. Here, the parameters are explained as an example for microscopy images of yeast cells.
 
@@ -46,10 +46,10 @@ The names of the following parameters are set as default in the *Naming scheme* 
 #### quantified from individual ROIs:
 
 - **mean_background** - mean intensity of the background of the image; assessed automatically by the macro; all reported intensity values are corrected for this number
-- **cell_no** - each  cell (ROI) has a designated number; corresponds to the ones displayed in the ROI manager in Fiji when both the image and the *ROI_Set* are loaded
+- **cell_no** - each cell (ROI) has a designated number; corresponds to the ones displayed in the ROI manager in Fiji when both the image and the *ROI_Set* are loaded
 - **cell_area** - the ROIs should be defined so that their edge is in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cell area, the ROI is made *bigger* by 0.166 $\mu m$ in each direction and its area measured
 - **cell_I.integrated** - total fluorescence intensity within a specified ROI made *bigger* by 0.166 $\mu m$ in each direction (see *cell_area*)
-- **cell_I.mean** - mean fluorescence intensity of the cell (ROI), i.e., *integrated fluorescence intensity* in the cell divided by the *cell area*, i.e.,  $`I^{integrated}_{cell}/area_{cell}`$
+- **cell_I.mean** - mean fluorescence intensity of the cell (ROI), i.e., *integrated fluorescence intensity* in the cell divided by the *cell area*, i.e., $`I^{integrated}_{cell}/area_{cell}`$
 - **cell_I.SD** - standard deviation of the mean fluorescence intensity of the cell
 - **cell_I.CV** - coefficient of variation of the mean fluorescence intensity of the cell, calculated as $SD/mean$
 - **axis_major** and **axis_minor** - the length of the major and minor axis of the ellipse fitted to the respective ROI
