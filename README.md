@@ -33,7 +33,7 @@ For each cell/ROI, multiple parameters are quantified. While some parameters are
 - **BR_date** - date of biological replicate; extracted from the name of the folder 2 levels above the data folder (first 6 characters); consult Fig. 3 in the *Protocol*
 
 
-#### extracted from the file names: \newline
+#### extracted from the file names:
 
 The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields in the *Naming scheme* input is the same as in the actual file names. Here, the parameters are explained as an example for microscopy images of yeast cells.
 
