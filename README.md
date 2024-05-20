@@ -1,19 +1,19 @@
-This repository contains **Fiji (ImageJ) macros for automatic analysis of microscopy images**. Their use is explained in detail in the **Zahumensky & Malinsky bioRxiv preprint: https://doi.org/10.1101/2024.03.28.587214**. The following text describes the output of the analysis, i.e., the *Results table*.
+This repository contains **Fiji (ImageJ) macros for automatic analysis of microscopy images**. Their use is explained in detail in the **Zahumensky & Malinsky *bioRxiv* preprint: https://doi.org/10.1101/2024.03.28.587214**. The following text describes the output of the analysis, i.e., the *Results table*.
 
 
 # **The *Results table***
 
-The output of the *Quantify* macro is a single large comma-separated table with data. It starts with a header that contains basic information on the macro run, followed by the results of the analysis, where each row contains data on individual cells (ROIs). These are separated into columns whose meaning is explained below.
+The output of the *Quantify* macro is a single large comma-separated table with data from all cells across all analyzed experiments. The table starts with a header that contains basic information on the macro run, followed by the results of the analysis, where each row contains data on individual cells (ROIs). These are separated into columns whose meaning is explained below.
 
 
 ## **Table header**
 
-Each line of the header starts with the pound (#) sign so that it is automatically ignored by the provided scripts, both *bash* and *R*.
+Each line of the header starts with the pound sign (#) so that it is automatically ignored by the provided scripts, both *bash* and *R*.
 
-- **Date and time** - date and time of when the macro was run in the YYYY-MM-DD HH:MM:SS format (note that the date and time of when the macro finished is written in the file name)
-- **Macro version** - version of the *Quantify* macro that was used for the analysis; this is specified in both the macro file name and in the actual macro code, under the *version* variable (at/around line 35)
-- **Channel** - specifies which channel of the fluorescence microscopy images was selected for quantification (also mentioned in the file name)
-- **Cell (ROI) size interval** - gives the range of sizes (areas) of the cells (ROIs) that were quantified; cells (ROIs) with area outside this range are automatically filtered out during the analysis; default is from 5 $\mu m^2$ to infinity
+- **Date and time** - date and time of the macro's execution (in YYYY-MM-DD HH:MM:SS format); note that the date and time of when the macro finished is written in the file name, using the same format.
+- **Macro version** - version of the *Quantify* macro used for the analysis; this is specified in both the macro file name and in the actual macro code, under the *version* variable (at/around line 35)
+- **Channel** - specifies which channel of the fluorescence microscopy images was selected for quantification (also stated in the file name)
+- **Cell (ROI) size interval** - the range of sizes (areas) of the cells (ROIs) that were quantified; cells (ROIs) with area outside this range are automatically ignored during the analysis; default is from 5 $\mu m^2$ to infinity
 - **Coefficient of variance threshold** - threshold used to automatically filter out cells based on the coefficient of variation of their mean fluorescence intensity; the idea is that the fluorescence of dead cells is quite uniform; the default value is 0 (i.e., nothing is filtered out); should be used with caution
 - **Smoothing radius (Gaussian blur)** *(transversal images only)* - the images are pre-processed before the analysis using a *Gaussian filter* to smooth out noise; the default value is 1
 - **Patch prominence** *(transversal images only)* - threshold value that designates how bright high-intensity foci need to be relative to their surroundings to be reported by the *foci_number* (see below); the value is set semi-empirically within the code to 1.666
@@ -21,7 +21,7 @@ Each line of the header starts with the pound (#) sign so that it is automatical
 
 ## **Columns**
 
-For each cell/ROI, multiple parameters are quantified. While some parameters are common for transversal and tangential images, others are specific to the given image type. In the list below, they are grouped accordingly and ordered as they are in the respective *Results table* for easier orientation. Note that all reported intensity values are background corrected.
+For each cell/ROI, multiple parameters are quantified. While some parameters are common for transversal and tangential images, others are specific to the given image type. In the list below, they are grouped accordingly and ordered as they appear in the respective *Results table* for easier orientation. Note that all reported intensity values are background corrected.
 
 
 ### **Common parameters**
@@ -35,7 +35,7 @@ For each cell/ROI, multiple parameters are quantified. While some parameters are
 
 #### extracted from the file names: \newline
 
-The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields is the same in the file names and the *Naming scheme* input. Here, the parameters are explained as an example for microscopy images of yeast cells.
+The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields in the *Naming scheme* input is the same as in the actual file names. Here, the parameters are explained as an example for microscopy images of yeast cells.
 
 - **strain** - the strain of the used yeast
 - **medium** - medium in which the cells were cultivated
@@ -46,22 +46,23 @@ The names of the following parameters are set as default in the *Naming scheme* 
 #### quantified from individual ROIs:
 
 - **mean_background** - mean intensity of the background of the image; assessed automatically by the macro; all reported intensity values are corrected for this number
-- **cell_no** - each cell (ROI) has a designated number; corresponds to the ones displayed in the ROI manager in Fiji when both the image and the *ROI_Set* are loaded
-- **cell_area** - the ROIs should be defined so that their edge is in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cell area, the ROI is made *bigger* by 0.166 $\mu m$ in each direction and its area measured
+- **cell_no** - each cell (ROI) has a designated number; corresponds to the ones displayed in the ROI manager in *Fiji* when both the image and the *ROI_Set* are loaded
+- **cell_area** - the area of the specified ROI; note that the ROIs should be defined so that their edge is in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cell area, the ROI is made *bigger* by 0.166 $\mu m$ in each direction
 - **cell_I.integrated** - total fluorescence intensity within a specified ROI made *bigger* by 0.166 $\mu m$ in each direction (see *cell_area*)
 - **cell_I.mean** - mean fluorescence intensity of the cell (ROI), i.e., *integrated fluorescence intensity* in the cell divided by the *cell area*, i.e., $`I^{integrated}_{cell}/area_{cell}`$
 - **cell_I.SD** - standard deviation of the mean fluorescence intensity of the cell
 - **cell_I.CV** - coefficient of variation of the mean fluorescence intensity of the cell, calculated as $SD/mean$
 - **axis_major** and **axis_minor** - the length of the major and minor axis of the ellipse fitted to the respective ROI
-- **eccentricity** - deviation from a perfect circle, of the ellipse fitted to the respective ROI; calculated as $\sqrt{1-(axis_{minor}/axis_{major})^2}$
+- **eccentricity** - deviation from a perfect circle of the ellipse fitted to the respective ROI; calculated as $\sqrt{1-(axis_{minor}/axis_{major})^2}$
 
 
 ### **Parameters for *transversal* images**
 
-- **cytosol_area** - the ROIs should be defined so that their edge is in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cytosol area, the ROI is made *smaller* by 0.166 $\mu m$ in each direction
+- **cytosol_area** - area of the cytosol of the corresponding cell; the ROIs should be defined so that their edge is in the middle of the plasma membrane (if the ROIs correspond to cells); for the measurement of the cytosol area, the ROI is made *smaller* by 0.166 $\mu m$ in each direction
 - **cytosol_I.integrated** - total fluorescence intensity within a specified ROI made *smaller* by 0.166 $\mu m$ in each direction
 - **cytosol_I.mean** - mean fluorescence intensity of the cytosol, i.e., integrated fluorescence intensity of the cytosol divided by the cytosol area, i.e., $`I^{integrated}_{cytosol}/area_{cytosol}`$
-- **cytosol_I.SD** - standard deviation of the mean fluorescence intensity in the cytosol- **cytosol_I.CV** - coefficient of variation of the mean fluorescence intensity in the cytosol, calculated as $SD/mean$
+- **cytosol_I.SD** - standard deviation of the mean fluorescence intensity in the cytosol
+- **cytosol_I.CV** - coefficient of variation of the mean fluorescence intensity in the cytosol, calculated as $SD/mean$
 - **plasma_membrane_area** - area of the plasma membrane (PM), i.e., $area_{cell}-area_{cytosol}$
 - **plasma_membrane_I.integrated** - total fluorescence intensity within the plasma membrane
 - **plasma_membrane_I.mean** - mean fluorescence intensity in the plasma membrane (PM), i.e., integrated fluorescence intensity of the plasma membrane divided by the plasma membrane area, i.e., $`I^{integrated}_{PM}/area_{PM}`$
@@ -70,10 +71,10 @@ The names of the following parameters are set as default in the *Naming scheme* 
 - **plasma_membrane_I.div.cyt_I(mean)** - ratio of mean fluorescence intensities in the plasma membrane and the cytosol, i.e., $`I^{mean}_{PM}/I^{mean}_{cytosol}`$
 - **plasma_membrane_I.div.cell_I(integrated)** - ratio of integrated fluorescence intensities in the plasma membrane and the whole cell, i.e., $`I^{integrated}_{PM}/I^{integrated}_{cell}`$
 - **cyt_I.div.cell_I(integrated)** - ratio of integrated fluorescence intensities in the cytosol and the whole cell, i.e., $`I^{integrated}_{cytosol}/I^{integrated}_{cell}`$
-- **foci_number** - number of detected high-intensity foci in the plasma membrane that may correspond to microdomains; detected from an intensity profile after minimal image processing, based on predefined thresholds for absolute intensity and intensity relative to the surrounding valleys
+- **foci_number** - number of detected high-intensity foci in the plasma membrane that may correspond to microdomains; detected from an intensity profile after minimal image processing, based on predefined thresholds for absolute intensity and intensity relative to the surrounding valleys (local minima)
 - **foci_density** - linear density of detected high-intensity foci in the plasma membrane, i.e., $number_{foci}/length_{PM}$, where $length_{PM}$ corresponds to the circumference of the respective ROI
 - **foci_I.mean** - mean fluorescence intensity of the maxima of detected high-intensity foci in the plasma membrane within a single cell
-- **plasma_membrane_base** - mean fluorescence intensity of the minima (valleys) between detected high-intensity foci in the plasma membrane within a single cell
+- **plasma_membrane_base** - mean fluorescence intensity of the valleys (local minima) between detected high-intensity foci in the plasma membrane within a single cell
 - **foci_prominence** - the ratio of *foci_I.mean* and *plasma_membrane_base*
 - **foci_outliers** - number of detected high-intensity foci in the plasma membrane with intensity higher than ***XYZ*** $\times$ *plasma_membrane_base*
 - **foci_profile_CLAHE** and **foci_density_profile_CLAHE** - analogous to *foci_number* and *foci_density*, but after local contrast enhancement using the built-in CLAHE plugin with he following parameters: "blocksize=8 histogram=64 maximum=3 mask=*None*”
@@ -94,7 +95,7 @@ The names of the following parameters are set as default in the *Naming scheme* 
 ### **Parameters for *tangential* images**
 
 - **foci_density(find_maxima)** - areal density of high-intensity foci in the plasma membrane, detected using the built-in *Find maxima* Fiji plugin (with *prominence* set to 1.666 and *exclude on edges* activated), i.e., $number_{foci}/area_{ROI}$, where $area_{ROI}$ corresponds to the area of the respective ROI
-- **foci_density(analyze_particles)** - areal density of high-intensity foci in the plasma membrane detected using the *Analyze particles* plugin and taking objects with area between 5 and 120 pixels. The image of the respective cell (ROI) is first binarized using adaptive thresholding. From the objects at the ROI boundary, only those touching the lower and right "edges" are counted (analogous to how a Bruker chamber is used to count cells in a suspension)
+- **foci_density(analyze_particles)** - areal density of high-intensity foci in the plasma membrane detected using the *Analyze particles* plugin and taking objects with area between 5 and 120 pixels. The image of the respective cell (ROI) is first binarized using adaptive thresholding. From the objects at the ROI boundary, only those touching the lower and right "edges" are counted (analogous to how a Bürker chamber is used to count cells in a suspension)
 - **area_fraction(foci_vs_ROI)** - total area of objects reported in *foci_density(analyze_particles)* divided by the area of the ROI, i.e., $area_{particles}/area_{ROI}$; gives an estimate of how much of the plasma membrane is covered with the studied microdomains
 - **length[um]** and **length_SD[um]** - mean and standard deviation of the length of the particles counted in *foci_density(analyze_particles)*, i.e., high-intensity foci (microdomains)
 - **width[um]** and **width_SD[um]** - mean and standard deviation of the width of the particles counted in *foci_density(analyze_particles)*, i.e., high-intensity foci (microdomains)
