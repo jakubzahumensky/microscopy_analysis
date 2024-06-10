@@ -33,7 +33,7 @@ For each cell/ROI, multiple parameters are quantified. While some parameters are
 - **BR_date** - date of biological replicate; extracted from the name of the folder 2 levels above the data folder (first 6 characters); consult Fig. 3 in the *Protocol*
 
 
-#### extracted from the file names:
+#### extracted from the file names: \newline
 
 The names of the following parameters are set as default in the *Naming scheme* field of the *Quantify* macro dialog window. They should be changed to reflect the actual names of the user's files. Make sure that the number of comma-separated fields in the *Naming scheme* input is the same as in the actual file names. Here, the parameters are explained as an example for microscopy images of yeast cells.
 
@@ -88,6 +88,9 @@ The names of the following parameters are set as default in the *Naming scheme* 
  -1 & -1 & -1 & -1 & -1
  \end{pmatrix}
 ```
+- **foci_threshold_Gauss** and **foci_density_threshold_Gauss** - number of detected high-intensity foci in the plasma membrane that may correspond to microdomains, detected after cell/ROI-limited intensity thresholding after minimal image processing; linear density of these foci (see foci_density above)
+- **foci_threshold_CLAHE** and **foci_density_threshold_CLAHE** - analogous to *foci_threshold_Gauss* and *foci_density_threshold_Gauss*, but after local contrast enhancement using the built-in CLAHE plugin with he following parameters: "blocksize=8 histogram=64 maximum=3 mask=*None*”
+- **foci_threshold_dotfind** and **foci_density_threshold_dotfind** - analogous to *foci_threshold_Gauss* and *foci_density_threshold_Gauss*, but after local contrast enhancement performed by filtering the image using the *dotfind* matrix (see above)
 - **foci_from_watershed** and **foci_density_from_watershed** - analogous to *foci_number* and *foci_density*, but after binarization of the image using the *Watershed Segmentation* plugin developed by *EPFL* (http://bigwww.epfl.ch/sage/soft/watershed) with the following settings: “blurring='0.0' watershed='1 1 0 255 1 0' display='2 0'”
 - **protein_in_microdomains[%]** - an integrated intensity-based estimate of how much of the fluorescent protein in the plasma membrane localizes to microdomains (high-intensity foci)
 
