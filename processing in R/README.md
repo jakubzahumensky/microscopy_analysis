@@ -1,1 +1,8 @@
+# R markdown used for automatic processing of the results from the Fiji macro based analysis of microscopy images
+creates summarization data tables, graphs and reports from statistical analyses
 
+Use: place the Results table to be processed into a folder together with the provided R markdown (data_processing.Rmd) and R project (data_processing.Rproj). Open the data_processing.Rmd file in R studio and run the script. A new folder called “analysis” is created with a subfolder for each experiment. The Results table is automatically filtered (grouped) based on all possible unique combinations of descriptive parameters (biological replicates, strains, conditions, etc.). Means and standard deviations (SDs) are calculated and reported in separate tables for each quantified parameter across these groups.
+
+Boxplots showing mean, median, range, and individual data points for biological replicates are generated for each parameter. The user is prompted to select the independent (x), grouping (factor) and faceting variables from sample description parameters, if multiple choices exist. The user can also select quantification parameters for which to plot intricate violin plots, including statistical analyses of differences (Bonferroni- or Holm-corrected multiple t-tests).
+
+Independent statistical analysis is performed on data with at least 3 biological replicates. Normality (Shapiro-Wilk) and equal variance (Levene’s test) are tested, followed by multiple unpaired t-tests (using Bonferroni and Holm corrections) and ANOVA with Tukey’s HSD (honestly significant difference) post-hoc test. Results are reported for each quantified parameter in a separate text file.
