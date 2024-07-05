@@ -16,6 +16,9 @@
 // Additional plugins required:
 // LabelMap to ROI Manager (2D) - add SCF-MPI-CBG update site
 version = 8.52;
+colour = "red";
+roiManager("Set Color", colour);
+
 
 //maskSuffix = newArray("_cp_masks.png", "_cp_masks.tif");
 maskSuffix = "_cp_masks.png";
@@ -395,6 +398,10 @@ function ROI_check(k){
 		grandparent_name = File.getName(File.getParent(parent));
 		roiManager("reset");
 		roiManager("Open", roiDir + title + RoiSet_suffix);
+		// remove information about the ROIs that would tie them to a specific channel/slice/time frame. This way, same ROIs can be used in all channels, slices etc.
+		roiManager("Remove Channel Info");
+    	roiManager("Remove Slice Info");
+		roiManager("Remove Frame Info");
 		numROIs = roiManager("count");
 		selectWindow(window);
 		run("Grays");
@@ -402,7 +409,7 @@ function ROI_check(k){
 		run("Set... ", "zoom=200 x=0 y=0");
 		setLocation(screenWidth/2-width-50, 0, screenWidth*3/4, screenHeight);
 		roiManager("Show All with labels");
-		roiManager("Set Color", "yellow");
+		roiManager("Set Color", colour);
 		run("Enhance Contrast", "saturated=0.5");
 		if (ellipses == "yes")
 			setTool("ellipse");
@@ -446,28 +453,28 @@ function ROI_check(k){
 		// as long as at least one of the resize and shift parameters are non-zero, show the dialog window
 		while ((size_change != 0) || (shift_x != 0) || (shift_y != 0) || (size_threshold != 0)){
 			Dialog.createNonBlocking("Check and adjust ROIs");
-			if (blind == "yes"){
-				dir_name = "hidden";
-				parent_name = dir_name;
-			}
-			Dialog.addMessage("Stats:\nfolder: \"" + grandparent_name + "/" + parent_name + "/" + dir_name + "\"" + "\nimage counter: " + i+1 + "/" + list.length + " (" + counter + "/" + count +" total)", 14);
-			Dialog.addMessage("Adjust all " + numROIs + " ROIs", 12);
-			Dialog.addNumber("Enlarge (neg. values shrink):", 0, 0, 2, "px");
-			Dialog.addNumber("Move right (neg. values move left)", 0, 0, 2, "px");
-			Dialog.addNumber("Move down (neg. values move up)", 0, 0, 2, "px");
-			Dialog.addNumber("Remove all ROIs with area smaller than", 0, 0, 2, "um^2");
-		   	Dialog.addNumber("Jump forward by (neg. values jump back)", 0, 0, 2, "images");
-		   	Dialog.addCheckbox("Exclude current image from analysis", false);
-		   	Dialog.addMessage("Click \"Help\" for more information on the parameters.");
-		   	Dialog.setLocation(screenWidth*3.3/4,screenHeight/7);
-		    Dialog.addHelp(html);
-		    Dialog.show();
-			size_change = Dialog.getNumber();
-			shift_x = Dialog.getNumber();
-			shift_y = Dialog.getNumber();
-			size_threshold = Dialog.getNumber();
-			jump = Dialog.getNumber();
-			exclude = Dialog.getCheckbox();
+				if (blind == "yes"){
+					dir_name = "hidden";
+					parent_name = dir_name;
+				}
+				Dialog.addMessage("Stats:\nfolder: \"" + grandparent_name + "/" + parent_name + "/" + dir_name + "\"" + "\nimage counter: " + i+1 + "/" + list.length + " (" + counter + "/" + count +" total)", 14);
+				Dialog.addMessage("Adjust all " + numROIs + " ROIs", 12);
+				Dialog.addNumber("Enlarge (neg. values shrink):", 0, 0, 2, "px");
+				Dialog.addNumber("Move right (neg. values move left)", 0, 0, 2, "px");
+				Dialog.addNumber("Move down (neg. values move up)", 0, 0, 2, "px");
+				Dialog.addNumber("Remove all ROIs with area smaller than", 0, 0, 2, "um^2");
+			   	Dialog.addNumber("Jump forward by (neg. values jump back)", 0, 0, 2, "images");
+			   	Dialog.addCheckbox("Exclude current image from analysis", false);
+			   	Dialog.addMessage("Click \"Help\" for more information on the parameters.");
+			   	Dialog.setLocation(screenWidth*3.3/4,screenHeight/7);
+			    Dialog.addHelp(html);
+		    	Dialog.show();
+				size_change = Dialog.getNumber();
+				shift_x = Dialog.getNumber();
+				shift_y = Dialog.getNumber();
+				size_threshold = Dialog.getNumber();
+				jump = Dialog.getNumber();
+				exclude = Dialog.getCheckbox();
 
 			if (exclude == true){
 				if (!File.exists(excludeDir))
@@ -506,13 +513,14 @@ function ROI_check(k){
 						roiManager("Select", j);
 						roiManager("Delete");
 					}
+				close("Results");
 				}
 			}
+			// remove information about the ROIs that would tie them to a specific channel/slice/time frame. This way, same ROIs can be used in all channels, slices etc.
+			roiManager("Remove Channel Info");
+	    	roiManager("Remove Slice Info");
+			roiManager("Remove Frame Info");
 		}
-		// remove information about the ROIs that would tie them to a specific channel/slice/time frame. This way, same ROIs can be used in all channels, slices etc.
-		roiManager("Remove Channel Info");
-	    roiManager("Remove Slice Info");
-		roiManager("Remove Frame Info");
 		roiManager("Save", roiDir + title + RoiSet_suffix);
 		if (save_preview == "yes" && matches(image_type, "tangential"))
 			ROI_preview();
