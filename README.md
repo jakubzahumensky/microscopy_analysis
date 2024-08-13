@@ -20,3 +20,6 @@ Up-to-date version of **R (including R Studio)** – recommended for automatic d
 **bash (unix terminal)** - optional - less powerful than R, but can be used with a single biological replicate; script provided here, in the *processing in bash* folder  
 **Prism 8 or higher (GraphPad)** – optional – for semi-automatic data processing  
 **Microsoft Excel/LibreOffice Calc** – optional – for manual data processing (not recommended)  
+
+## Copyright
+The code is available under the CC BY-NC licence. The users are free to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes. Attribution to the creator is required.
