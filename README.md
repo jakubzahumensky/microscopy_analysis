@@ -1,5 +1,5 @@
 # Automated analysis of microscopy data - from images to numbers and plots
-**Fiji (ImageJ)** macros and **R scripts (markdown)** used to analyze microscopy images. The required data structure and use of the code is described in detail in: **Zahumensky & Malinsky bioRxiv preprint - Live Cell Fluorescence Microscopy – From Sample Preparation to Numbers and Plots** (doi: https://doi.org/10.1101/2024.03.28.587214).
+This repository contains custom **Fiji (ImageJ)** macros and **R scripts (markdown)** that we have developed for automatic analysis of microscopy images. The required data structure and use of the code is described in detail in: **Zahumensky & Malinsky bioRxiv preprint - Live Cell Fluorescence Microscopy – From Sample Preparation to Numbers and Plots** (doi: https://doi.org/10.1101/2024.03.28.587214).
 For detailed description of the parameters reported in the Results table see _results_table_legend.md_ in the _Fiji macros_ folder.  
 
 ## Required software:
@@ -12,8 +12,8 @@ For detailed description of the parameters reported in the Results table see _re
 **Fiji** (ImageJ 1.53t or higher): https://imagej.net/software/fiji/downloads  
 The macros require additional plugins/libraries that are not part of the general Fiji download:  
 - *SCF-MPI-CBG* and *BIG-EPFL* - to install, navigate through Help → Update → Manage update sites, then tick checkboxes for BIG-EPFL and SCF MPI CBG. Click Apply and Close → Apply changes → OK; restart Fiji  
-- *Watershed_* plugin - to install, download from http://bigwww.epfl.ch/sage/soft/watershed/ and put in the plugins folder of Fiji/ImageJ  
-- *Adjustable Watershed* plugin - to install, download *Adjustable_Watershed.class* from https://github.com/imagej/imagej.github.io/blob/main/media/adjustable-watershed and put it in the Plugins folder of Fiji/ImageJ  
+- *Watershed_* plugin - to install, download from http://bigwww.epfl.ch/sage/soft/watershed/ and place it in the plugins folder of Fiji/ImageJ  
+- *Adjustable Watershed* plugin - to install, download *Adjustable_Watershed.class* from https://github.com/imagej/imagej.github.io/blob/main/media/adjustable-watershed and place it in the Plugins folder of Fiji/ImageJ  
   
 ### Data processing and graphing
 Up-to-date version of **R (including R Studio)** – recommended for automatic data processing - scripts provided here, in the *processing in R* folder  
