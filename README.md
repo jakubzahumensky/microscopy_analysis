@@ -22,4 +22,5 @@ Up-to-date version of **R (including R Studio)** – recommended for automatic d
 **Microsoft Excel/LibreOffice Calc** – optional – for manual data processing (not recommended)  
 
 ## Copyright
-The codes and scripts are available under the CC BY-NC licence. The users are free to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes. Attribution to the creator is required.
+The codes and scripts are available under the CC BY-NC licence. The users are free to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes. Attribution to the creator is required.  
+Recommended citation: https://www.biorxiv.org/content/10.1101/2024.03.28.587214v2
