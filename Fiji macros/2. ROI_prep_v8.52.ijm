@@ -37,6 +37,7 @@ var excludeDir = ""; // during checking and adjusting of ROIs, an image can be m
 var dirType = ""; // tangential / transversal - code requires a bit of an overhaul for wider audience
 var count = 0; // number if images to be processed
 var counter = 1; // variable used to store how many images have been processed
+var RS_count = 0;
 
 var RoiSet_suffix = "-RoiSet.zip";
 var files_with_ROIs = ""; // list of files that do not have defined ROIs
@@ -237,7 +238,6 @@ function countFiles(dir){
 // 1. to find out if some images already have ROIs when the Convert masks to ROIs option is selected, and give a warning if yes
 // 2. to notify the user while checking the ROIs if there are any images without defined ROIs
 function countRoiSetFiles(dir, boo){
-	RS_count = 0;
 	list = getFileList(dir);
 	for (i = 0; i < list.length; i++){
 		if (endsWith(list[i], "/"))
