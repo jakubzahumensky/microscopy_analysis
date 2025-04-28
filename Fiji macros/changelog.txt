@@ -1,0 +1,8 @@
+ROI prep 9.0
+- fixed the option to manually define ROIs
+
+ROI prep 9.0 & Quantify 15.0
+- changed the naming of ROISets to make them compatible with other quanification macros (e.g., Kymolyzer, currently under development)
+- unified the naming style of functions
+
+The new versions are not backward compatible with ROI prep 8.x and Quantify 14.x!
