@@ -1,4 +1,5 @@
-This repository contains **Fiji (ImageJ) macros for automatic analysis of microscopy images**. Their use is explained in detail in the **Zahumensky & Malinsky *bioRxiv* preprint: https://doi.org/10.1101/2024.03.28.587214**. The following text describes the output of the analysis, i.e., the *Results table*.
+This repository contains **Fiji (ImageJ) macros for automatic analysis of microscopy images**. Their use is explained in detail in the **Zahumensky J., Malinsky J. Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis**. *Biology Methods and Protocols*, Volume 9, Issue 1, 2024, bpae075, (doi: https://doi.org/10.1093/biomethods/bpae075).
+The following text describes the output of the analysis, i.e., the *Results table*.
 
 
 # **The *Results table***
