@@ -52,9 +52,9 @@ column names are written in the output by the code.
 
 ``` r
 workingDir <- here()
-results_file <- list.files(getwd(), pattern = "Results")
+results_file <- list.files(getwd(), pattern = "^Results")
 # if there are multiple Results tables in the current directory, ask which one to process
-if (length(results_file) > 0){
+if (length(results_file) > 1){
   results_file <- dlg_list(
     results_file,
     preselect = NULL,
@@ -65,16 +65,10 @@ if (length(results_file) > 0){
 }
 
 if (length(results_file) == 0){
-    dlg_message(
-    "No Results table found. Terminating script.",
-    type = c("ok"),
-  )
+  results_file <- file.choose()
 }
 
 data_table <- data.table(read.csv(file = results_file, header = TRUE, sep = ",", quote = "", dec = ".", comment.char = "#"))
-# before continuing, we convert all 'NaN' values to 0
-for (col in names(data_table))
-  set(data_table, i = which(data_table[[col]] == "NaN"), j = col, value = 0)
 
 for (col in names(data_table))
   set(data_table, i = which(data_table[[col]] == "control"), j = col, value = "_control")
@@ -151,7 +145,7 @@ for (EXP in unique(data_table$exp_code)){
   # summarize the data table, i.e., calculate mean and SD for all columns with numbers from quantification
   summary <- data.table(data_table_exp %>% 
     group_by(BR_date, across(all_of(parameters))) %>%
-    dplyr::summarise(across(all_of(columns), list(mean = ~mean(.), sd = ~sd(.)), .names = "{col}_{fn}")))
+    dplyr::summarise(across(all_of(columns), list(mean = ~mean(., na.rm=TRUE), sd = ~sd(., na.rm=TRUE)), .names = "{col}_{fn}")))
   assign(paste0("summary_", EXP), summary)
   
   # ask the user to select a column by which the summary tables will be ordered
@@ -195,6 +189,16 @@ for (EXP in unique(data_table$exp_code)){
     out_file <- glue("analysis/{EXP}/{COL}.xlsx")
     writexl::write_xlsx(as.data.frame(summary_wide), path = here("", out_file))
   }
+
+  # count the number of cells in each group and save a table with the counts
+  cell_counts <- data.table(data_table_exp %>%
+    group_by(BR_date, across(all_of(parameters))) %>%
+    dplyr::summarise(n = n(), .groups = 'drop')) %>%
+    reshape(idvar = parameters, timevar = "BR_date", direction = "wide")
+  assign(paste0("cell_counts_", EXP), cell_counts)
+  setorderv(cell_counts, cols = sorting_col)
+  out_file <- glue("analysis/cell_counts_{EXP}.xlsx")
+  writexl::write_xlsx(as.data.frame(cell_counts), path = here("", out_file))
 }
 ```
 
@@ -298,6 +302,8 @@ for (EXP in unique(data_table$exp_code)){
       descr <- paste0("_", terms_extra_choices, collapse = "")
     out_file <- glue("analysis/{EXP}/{COL}{descr}.png")
     ggsave(out_file, figure, device = "png", width = fig_width, height = fig_height)
+    out_file <- glue("analysis/{EXP}/{COL}{descr}.pdf")
+    ggsave(out_file, figure, device = "pdf", width = fig_width, height = fig_height)
   }
 }
 ```
@@ -525,7 +531,7 @@ for (EXP in unique(data_table$exp_code)){
 }
 ```
 
-### Inform the user that the processing has finished and all available smmary tables, graphs, and statistical analyses have been performed.
+### Inform the user that the processing has finished and all available summary tables, graphs, and statistical analyses have been performed.
 
 ``` r
 dlg_message(
