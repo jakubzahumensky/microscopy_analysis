@@ -1,5 +1,6 @@
 # Automated analysis of microscopy data - from images to numbers and plots
-This repository contains custom **Fiji (ImageJ)** macros and **R scripts (markdown)** that we have developed for automatic analysis of microscopy images. The required data structure and use of the code is described in detail in: **Zahumensky & Malinsky bioRxiv preprint - Live Cell Fluorescence Microscopy – From Sample Preparation to Numbers and Plots** (doi: https://doi.org/10.1101/2024.03.28.587214).
+This repository contains custom **Fiji (ImageJ)** macros and **R scripts (markdown)** that we have developed for automatic analysis of microscopy images. The required data structure and use of the code is described in detail in: **Zahumensky J., Malinsky J. Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis**. *Biology Methods and Protocols*, Volume 9, Issue 1, 2024, bpae075, 
+(doi: https://doi.org/10.1093/biomethods/bpae075).
 For detailed description of the parameters reported in the Results table see _results_table_legend.md_ in the _Fiji macros_ folder.  
 
 ## Required software:
@@ -23,4 +24,7 @@ Up-to-date version of **R (including R Studio)** – recommended for automatic d
 
 ## Copyright
 The codes and scripts are available under the CC BY-NC licence. The users are free to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes. Attribution to the creator is required.  
-Recommended citation: https://doi.org/10.1093/biomethods/bpae075
+Citation: Jakub Zahumensky, Jan Malinsky. Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis.
+Biology Methods and Protocols, Volume 9, Issue 1, 2024, bpae075, 
+https://doi.org/10.1093/biomethods/bpae075
+
