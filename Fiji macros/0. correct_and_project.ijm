@@ -1,17 +1,21 @@
-// *****************************************************************
-// * title: "Correction and projection of multidimensional images" *
-// * author: Jakub Zahumensky; e-mail: jakub.zahumensky@iem.cas.cz *
-// * - Department of Functional Organisation of Biomembranes       *
-// * - Institute of Experimental Medicine CAS                      *
-// * - citation: doi: https://doi.org/10.1101/2024.03.28.587214)   *
-// *****************************************************************
-//
-// SUMMARY:
-//
-// This macro takes time- or z-series of images, corrects their drift and saves the corrected image.
-// It can also perform bleach correction and compute a z-projection, which can be selected in the initial dialog window.
-// The macro uses the StackReg plugin for drift correction. Enable the BIG-EPFL update site to gain access to it.
-// For the macro to work properly, the data to be processed need to be in a folder called "data-raw". The directory chosen 
+/**************************************************************************************************************
+ * BASIC MACRO INFORMATION
+ *
+ * title: "Correction and projection of multidimensional images" 
+ * author: Jakub Zahumensky
+ * - e-mail: jakub.zahumensky@iem.cas.cz
+ * - e-mail: jakub.zahumensky@gmail.com
+ * - GitHub: https://github.com/jakubzahumensky
+ * - Department of Functional Organisation of Biomembranes
+ * - Institute of Experimental Medicine CAS
+ * - citation: https://doi.org/10.1093/biomethods/bpae075
+ *
+ * Summary:
+ *  This macro takes time- or z-series of images, corrects their drift and saves the corrected image.
+ *  It can also perform bleach correction and compute a z-projection, which can be selected in the initial dialog window.
+ *  The macro uses the StackReg plugin for drift correction. Enable the BIG-EPFL update site to gain access to it.
+ *  For the macro to work properly, the data to be processed need to be in a folder called "data-raw". The directory chosen 
+ **************************************************************************************************************/
 
 setBatchMode(true); // starts batch mode, i.e. no images are shown on the screen during the macro run; works faster
 
@@ -29,9 +33,17 @@ n = 0; // initial counter value (used to report the runnin number of the current
 dir_type = "-raw/"; // only images stored in directories whose names end with "-raw" are processed
 
 // definition of options that will be given to the user for the correction and projection
-var bleach_correction_method = newArray("none", "Histogram Matching", "Simple Ratio"); // there is another bleach correction in ImageJ called "Exponential Fit", but has been omitted here, since it has a tendency to stop the macro
-var projection_type = newArray("none", "AVERAGE", "MAX", "SUM", "all"); // options for z-projection after drift (and bleach) correction
-var boolean = newArray("no", "yes");
+bleach_correction_method = newArray("none", "Histogram Matching", "Simple Ratio"); // there is another bleach correction in ImageJ called "Exponential Fit", but has been omitted here, since it has a tendency to stop the macro
+projection_type = newArray("none", "AVERAGE", "MAX", "SUM", "all"); // options for z-projection after drift (and bleach) correction
+boolean = newArray("no", "yes");
+
+var projectionsDir = "";
+var	dataDir = "";
+var channels = 0;
+var slices = 0;
+var width = 0;
+var height = 0;
+
 
 // initial environment preparation - close all open images, text windows, results tables etc.
 close("*");
@@ -46,22 +58,23 @@ help = "<html>"
 	+"Specify the directory where you want <i>Fiji</i> to start looking for folders with images. "
 	+"The macro works <u>recursively</u>, i.e., it looks into all <i>sub</i>folders. "
 	+"All folders with names <u>ending</u> with \"<i>-raw</i>\" (and only these) are processed. "
-	+"All other folders are ignored.<br>"
-	+"<br>"
+	+"All other folders are ignored. <br><br>"
+	
 	+"<b>Correct bleaching</b><br>"
 	+"Select what algorithm (if any) you wish to use to correct bleaching of your image sequences. "
 	+"There is another bleach correction option in ImageJ called \"<i>Exponential Fit</i>\", "
-	+"but has been omitted from the selection here, since it has a tendency to stop the macro.<br>"
-	+"<br>"
+	+"but has been omitted from the selection here, since it has a tendency to stop the macro. <br><br>"
+	
 	+"<b>Projection</b><br>"
 	+"Select what kind of projection (if any) you wish to compute from your image sequences. "
 	+"Only the most common \"<i>MAX</i>\", \"<i>AVERAGE</i>\" and \"<i>SUM</i>\" are included here. "
-	+"Addition of other options is not straightforward.<br>"
-	+"<br>"
+	+"Addition of other options is not straightforward. <br><br>"
+	
 	+"<b>Overwrite previously processed images</b><br>"
 	+"Choose if you want to overwrite previously processed (i.e., drift- and/or bleach- corrected) images. "
 	+"These are kept by default, as they are computationaly demanding. "
-	+"Note that the filename of the processed image does not include information about bleach corrections.<br>"
+	+"Note that the filename of the processed image does not include information about bleach corrections. <br>"
+	
 	+"</html>";
 Dialog.create("Correct drift and bleach, calculate projection");
 	Dialog.addMessage("Note: Images with following extensions are processed: " + exlist +". \nIf your files have another extension, please add it to the 'extension_list' array in line 18.");
@@ -126,6 +139,18 @@ function processFolder(dir) {
 
 // the following operations are performed with each image
 function processFile(q) {
+	prepareFolders();
+	// open an image (series) to be processed (q=dir+list[i]; see above) and rename it for easier access
+	open(q);
+	rename(image_name);
+	removeBlackSlices();
+	correctDriftAndBleaching();
+	rename("merged");
+	calculateProjections();
+	close("*");
+}
+
+function prepareFolders(){
 	// Check if the required directories exist. If not, create them. The corrected images will be stored in these.
 	projectionsDir = File.getParent(dir) + "/" + replace(File.getName(dir), "-raw", "-projections")+"/";
 	dataDir = File.getParent(dir) + "/" + replace(File.getName(dir), "-raw", "-processed")+"/";
@@ -133,9 +158,9 @@ function processFile(q) {
 		File.makeDirectory(dataDir);
 	if (!File.exists(projectionsDir) && (projection != "none"))
 		File.makeDirectory(projectionsDir);
-	// open an image (series) to be processed (q=dir+list[i]; see above) and rename it for easier access
-	open(q);
-	rename(image_name);
+}
+
+function removeBlackSlices(){
 	getDimensions(width, height, channels, slices, frames);
 	// check the image series (starting at the end). If a slice is blank (can result from aborted z-stacks or time series), delete it.
 	for (s = channels*slices; s >= 1; s--){
@@ -151,15 +176,30 @@ function processFile(q) {
 			} else
 				break;
 	}
-	// perform 1. drift and 2. bleach correction separately for each channel, then put the channels back together
+}	
+
+function correctDriftAndBleaching(){
+// perform 1. drift and 2. bleach correction separately for each channel, then put the channels back together
 	if (!File.exists(dataDir + list[i] + "-processed.tif") || overwrite == "yes"){
-		run("Split Channels");
+		if (channels > 1)
+			run("Split Channels");
 		for (j = 1; j <= channels; j++) {
-			temp_image_name = "C" + j + "-" + image_name;
+			temp_image_name = image_name;
+			if (channels > 1)
+				temp_image_name = "C" + j + "-" + image_name;
 			selectImage(temp_image_name);
-			run("StackReg", "transformation=Translation"); // Enable the BIG-EPFL update site to gain access to the StackReg plugin.
+
+			if (bleach_correct != "none"){
+				selectWindow(temp_image_name);
+				if (slices*channels > 1)
+					run("Bleach Correction", "correction=[" + bleach_correct + "]");
+			}
+			
+//			run("StackReg", "transformation=[Translation]"); // Enable the BIG-EPFL update site to gain access to the StackReg plugin.
+			run("StackReg ", "transformation=Translation");
 			autocrop(temp_image_name); // function defined below that crops the image to olny keep the parts that were imaged in each frame of the series; required for the bleach correction to work properly
 			// perform bleach correction using selected algorithm, if desired
+
 			if (bleach_correct != "none"){
 				selectWindow(temp_image_name);
 				if (slices*channels > 1)
@@ -170,11 +210,13 @@ function processFile(q) {
 			}
 		}
 		// put the processed channels back together, save the result and rename the image for further work
-		run("Merge Channels...", "c1=[C1-image] c2=[C2-image] create"); //this merges the channel in a way that red is ch1 and green is ch2
+		if (channels > 1)
+			run("Merge Channels...", "c1=[C1-image] c2=[C2-image] create"); //this merges the channel in a way that red is ch1 and green is ch2
 		saveAs("TIFF", dataDir + list[i] + "-processed");
 	}
-	rename("merged");
-	
+}
+
+function calculateProjections(){
 	// calculate selected projections
 	if (projection == "AVERAGE" || projection == "all"){ // calculate AVG projection if "AVG" or "all" was selected in the initial dialog window
 		selectWindow("merged");
@@ -197,10 +239,7 @@ function processFile(q) {
 		saveAs("TIFF", projectionsDir + list[i] + "-SUM");
 		close();
 	}
-	run("Z Project...", "projection=[Average Intensity]");
-	close("*");
 }
-
 // function to crop the image to only keep the parts that were imaged in each frame of the series
 function autocrop(j_img) {
 	selectImage(j_img);
