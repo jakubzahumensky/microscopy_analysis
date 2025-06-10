@@ -1,0 +1,126 @@
+24.10.2022; version 6.1 of Quant_of_sections
+- included measurement of Major and Minor axis of each cell, and calculation of ellipse eccentricity. These parameters are now reported in the last three columns of the "Summary" file.
+
+18.11.2022 - Unification
+- finished unification of quantification macros into a single file
+- included counting of PM-apposed P-bodies based on patch prominence (ratio of background-corrected maximum intensity and PM_base > 5) - currently under fine-tuning; p-body number is a subset of reported number of patches, which makes it easy to ignore this parameter when not relevant (there will necessarily be false positives occasionally); analysis of patch distribution and intensity includes maxima qualified as p-bodies
+- Caps - ROIs for measurement of patches are circles with 2/3-area of segmentation ellipse. They are concentric with said ellipses
+
+7.12.2022 - "Duplicate" updated
+changed following:
+	run("Duplicate...", "duplicate channels="+ch);
+	rename("DUP");
+to following:
+	run("Duplicate...", "title=DUP duplicate channels"+ch);
+---
+in "export.ijm" Dialog window:
+- changed how macro masks for input folder to make it consistent with the other macros
+- included contrast adjustment option
+- included help option
+---
+- "Fit ellipse" substituted with:
+	run("Enlarge...", "enlarge=1 pixel");
+	run("Enlarge...", "enlarge=-1 pixel");
+This way the shape is retained completely, while "Area to line" becomes functional for the ROI. Therefore, cells that are significantly different from elliprical budding cells can be analyzed as well (hyphae, elongated S. pombe cells, neurons, epithelial cells, etc...). For manual addition of ROI, ellipse is still the simplest and most user friendly option, at least for S. cerevisiae cells.
+
+8.12.2022
+- implemented option to select Cell type: Budding yeast/other (Budding yeast being default) - transversal ROIs are converted to ellipses only when "Budding yeast" is selected. This is because for other cell types, including fission yeasts and hyphae, fitting an ellipse does not make sense.
+
+3.5.2023 - ROI_prep6
+- implemented batchMode for Maps_to_ROI conversion - most time saved in opening and closing windows. The actual conversion and selective deletion does not seem to be much affected (compared my regular Zeiss 510 images and SM's images from SpinSR10 with huge amount of cells)
+- overall counter included into Check_ROIs stats windows (countfiles function)
+
+25.6.23
+- option to blind eperimenter during the ROI_check has been implemented - shuffles images and hides imagenames from the experimenter during ROI_check step.
+
+27/28.6.2023
+- the option to cycle through channels has been added - allows the user to analyze multiple channels in a single run (defined individually, or as range). Results are stored separately for each channel
+- added option to resume aborted/failed analysis: macro stores a list of images that have been already processed. These are skipped when analysis is resumed. Filenames of Images without defined ROIs are also stored, in a separate file. These are also skipped during analysis (otherwise the analysis wuold stop with an error). Upon creation of the respective ROIs, the analysis can be resumed to analyze these files. When analysis is resumed, empty lines are created in the data report table.
+
+29.6.-20.7.2023
+- wait(50) for selectWindow and RoiManager(select, j); was substituted with new functions that check if the expected image is open/image has a ROI secelted before continuing (and waits until the respective condition is fulfilled) (select_window(win_title); and selectROI(j);)
+- new approaches to quantification of patches in the transversal images were tested and optimized: dotfind (mean filter + enhancement of local maxima; based on previous JaM approach in matlab) and the watershed_segmentation plugin, which processed a regular (8bit) image and turns it into a segmented binary mask (very time consuming; resulting images are saved in a dedicated directory; option to load them for resumed analysis needs to be added). The reason for this update was incorrect patch counting in the M-064 experiment (Sur7-mCherry, Elk1-GFP, C. albicans for SBU). The numbers are still lower than they should be (manual counting), but it is better. This resulted in the introduction of one or two new functions to make the quantification use less code (patches_from_intensity_profile(window);
+- lots of parameters are now reported (returned) from frunctions in the form of arrays (e.g., mean, SD, area etc), which makes the code simpler, but less intuitive to read comments added at respective places
+
+
+--------------------------------------------------------------------------
+There was a Fiji update where the behaviour of masks regarding black and white changed to the opposite. Some rewriting to accomodate this was required.
+--------------------------------------------------------------------------
+
+25-26.7.2023
+CAPS:
+- elliptical ROIs were originally substituted with circles with a defined R (in the beginning a fixed value, than changed based on the actual ROI area). Now the shape and orientation of the ellipse is retained, it is only made smaller by the run("Enlarge=-"+Delta); function, where Delta = major_axis/2*(1-sqrt(2/3)); - this is important for images obtained from z-stack projections. Originally, the reasons for this were to only analyze the part of cell that can be deemed approximately flat (so the projection onto a flat surface does not cause distortion) and also to prevent inclusion of surrounding background into the analyzed ROI, as this caused big issues.
+- massive overhaul in the quantification of patches from tangential sections for both approaches (Find Maxima... and Threshold). CLAHE was deemed the best tool to enhance local contrast, better than dotfind. Both approaches now use the mean intensity of area bewteen patches (based on the measure_background function implemented previously). The apporaches give comparable results. They will need to be fine-tunes to work correctly with cells without patches.
+- analyze_particles - min and max size set based on actual image dimensions (needs to be done also in transversal part)
+- thresholding upper limit set based on the actual bit-depth instead of 65535 - check needed if for all instances
+
+TRANSVERSAL:
+- the estimation of mean intensity of membrane between patches can be also used for the same in quantification of transversal images (currently performed by averaging minima from an intensity plot) - the values obtained from both are expected to be comparable
+Quant - initial two dialog windows combined into one and the default lower cell area limit set to 5 for all images.
+- processed images are now saved with "/" all the time; slah/backslash depends on how the directory is entered (copied/using the browse button); needs to be also done in the beginning when the list of processed images is checked for the current image file; otherwise the resuming of analysis might not work properly
+
+27.7.2023
+- a function added to the ROI_check function, where the overview of ROIs actually used for quantification is saved
+
+7.8.2023
+- rewrote "Find Peaks" sections with native IJ commands, specifically getProfile and Array.findMaxima/Minima, which allowed the analysis of transversal images to run in the batch mode. Hurray! It also changed slightly how the PM_base is measured and the number of patches in the output.
+- changed how P-bodies (outliers) are counted in/at the PM - anything with patch prominence > 6 is considered an outlier. This was based on an analysis of Sur7 images, which are the most prominent.
+- preparing Watershed_segmentation masks takes a lot of time even in batch mode, so making them all before running the analysis oes not make sense.
+- incorporated positioning of windows (only thing shown on the monitor when macro is running), but it is not behaving completely well. This is, however, low priority.
+- tried roiManager("update"); in the ROI_prep macro, does not work as expected
+
+9.8.2023
+TRANSVERSAL
+- watershed segmentation - rewrote so that the "cleaning" is performed only once, in the whole image, using PM_masks set the same way as the individual cell masks were made in the original version, creating a PM_patches_mask. When cycling trhough ROIs to analyze cells, duplicating and creating masks is no longer needed. Instead, only the respective ROI is selected in the PM_patches_mask for analyze particles (exclude on edges active). In addition, the PM_patches_masks are saved in the same folder as the WS masks. This allows to quickly run WS_segmentation-based colocalization analysis once multiple channels have been processed.
+ROI_PREP
+- removed obsolete functions that removed ROIs if there were a lot of pixels with intensity lower than background+2*SD.
+- rewrote the warning that exiting ROIs will be overwritten. Now it actually checks and only warns if it finds any. It them lists them in the Log window and ask the user if they want to overwrite them. In "No" is selected, only the images without ROISets are processed.
+- backslashes in all paths are converted to slashes immediately after dir selection (when copy-pasting path, it uses backslashes, when the 'browse' button is used, it uses slashes). This was necessary for all the "continue analysis" (Quantify macro) and "do not overwrite existing ROI Sets" (ROI_prep macro) options
+
+10.8.2023
+CheckROIs
+- corrected filtering of ROIs too close to the image edge, also changed the variable names to be more descriptive, ROIs are now also filtered based on circularity when 'Fit with ellipses' is selected
+- RoiSets are now counted only if the "Convert Masks to ROIs" process is selected; now it also works with caps
+- cleaned up a bit
+- the values for enlarging/shrinking and movement of ROIs are now based on pixelWidth instead of actual pixel (I thought this would enable the use of roiManager("update") function, but it didn't. I am not changing it back)
+- added hints for when the macro does not process anything, also lists which files were not processed due to missing Segmentation Masks images
+TRANSVERSAL
+- adjusting patches_from_profile so that it does not return zeroes, all parameters (PM_base, BC subtraction etc) calculated from the actual processed image when needed (previously, it was using parameters from the raw image... also for CLAHE and dotfind processed images)
+- changed behaviour of find_parents - if the names of the data folders are shorter than specified in the initial dialog window, it uses the whole name and does not break down due to an error
+- intensity threshold for identification of patch outliers (e.g., P-bodies) needs to be specified separately for Gauss, CLAHE and dotfind. The idea, however, is not to retain all, but select one, ideally.
+QUANT
+- rewrote resuming incomplete analysis - it now checks for temporary files (unfinished analysis) before start of the process, not before each channel. "Continue" takes effect for all channels, as does "start fresh". No more prompts are displayed during the run.
+
+11.8.2023
+- incorporated test mode activation in the beginning of the quantification macro - line 2, just after setBatchMode(true) - makes it easier to change stuff (actually just changes cycling through ROIs from all, to ROIs 4-6)
+QUANTIFICATION
+- incorporating check if desired channel for analysis exists in all images to be processed
+- removed empty lines from temp_results and file_list when analysis is resumed - new text window was required; processing status (image x out of Y) is now printed to the LOG window - without it the macro cannot be stopped
+Map_to_ROIs()
+- images without segmentation Masks are skipped and listed in the Log window
+ROI_check
+- images without ROI_Sets are skipped and listed in the Log window
+- jump forward and backward by user-defined number implemented instead of the go_back option; works only within current folder; works well, COUNTER IS FUNKY
+- added option to exclude current image from analysis - physically moves the image from the "data" to the "data-exclude" folder. Images in this folder are skipped.
+
+14.8.2023
+Quant
+- updated channel checking for when the user does not use standard order from lowest to highest
+- updated how the new folder are created - this fixes possible issues if the word "data" is also somewhere else in the absolute path beside where it is expected for the macros
+
+November-6.12.2023
+changed data structure from "data" and "data-caps" to master folders called "transversal" and "tangential", within which the "data" folder is located for each; this makes the stucture and code simpler and easier to follow
+ROI_prep
+- if there is a "Masks" folder it is automatically renamed to "masks"
+- added option to automatically remove ROIs smaller than certain size
+quantify_v14
+- if analysis is started from the actual "data" folder, the starting (masterDir) is moved one level up
+- added lots of new comments added all around
+- added afunction to estimate the remaining time, updates the status window
+- updated the foci quantification from watershed_segmentation
+- unified how the parameters are measured for transversal and tangential images
+- removed shrinking of ROIs in the tangential section
+tangential
+- added reporting of cell parameters - area, intensity etc
+- added calculation of how much protein is in microdomains
+- fixed the calcutation of area fraction taken up by microdomains

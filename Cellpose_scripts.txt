@@ -1,0 +1,22 @@
+**********SECTIONS*****************
+Zeiss
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export\ --pretrained_model cyto2 --chan 0 --diameter 65 --cellprob_threshold 2.0 --flow_threshold 0.1 --savedir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\masks\ --use_gpu --no_npy --exclude_on_edges --verbose --save_png
+
+Olympus
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export\ --pretrained_model cyto2 --chan 0 --diameter 40 --cellprob_threshold 2.0 --flow_threshold 0.3 --use_gpu --no_npy --exclude_on_edges --verbose --save_png
+
+Olympus SpinSR10 (Candida)
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export\ --pretrained_model cyto2 --chan 0 --diameter 60 --cellprob_threshold 3.0 --flow_threshold 0.4 --savedir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\masks\ --no_npy --exclude_on_edges --verbose --save_png
+
+Olympus SpinSR10 (S.cer Sur7)
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export\ --pretrained_model cyto2 --chan 0 --diameter 80 --flow_threshold 2.0 --cellprob_threshold 1.5 --no_npy --exclude_on_edges --verbose --savedir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\masks\ --save_png
+
+************CAPS**************
+Zeiss
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export-caps\ --pretrained_model cyto2 --chan 0 --diameter 50 --cellprob_threshold 0.0 --flow_threshold 0.1 --use_gpu --no_npy --exclude_on_edges --save_png
+
+Olympus
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export-caps\ --pretrained_model cyto2 --chan 0 --diameter 35 --cellprob_threshold 2.0 --flow_threshold 0.2 --use_gpu --no_npy --exclude_on_edges --verbose --savedir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\masks-caps\ --save_png
+
+Olympus SpinSR10
+python -m cellpose --dir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\export\ --pretrained_model cyto2 --chan 0 --diameter 50 --flow_threshold 1.0 --cellprob_threshold 1.0 --use_gpu --no_npy --exclude_on_edges --verbose --savedir D:\Yeast\EXPERIMENTAL\microscopy\_analysis\_Cellpose\masks\ --save_png

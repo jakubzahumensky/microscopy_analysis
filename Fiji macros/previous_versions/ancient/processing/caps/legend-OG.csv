@@ -1,0 +1,16 @@
+1,exp_code
+2,BR_date
+3,strain
+4,medium
+5,cultivation_time
+6,condition
+7,frame
+8,cell
+9,area_fraction(patch-ROI)
+10,density(analyze_particles)
+11,density(find_maxima)
+12,patch_area
+13,patch_area_SD
+14,patch_length
+15,patch_length_SD
+16,mean_patch_intensity

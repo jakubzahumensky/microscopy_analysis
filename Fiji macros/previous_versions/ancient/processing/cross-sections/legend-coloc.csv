@@ -1,0 +1,17 @@
+1,exp_code
+2,BR_date
+3,strain
+4,medium
+5,time
+6,condition
+7,frame
+8,BC-red_ch
+9,BC-green_ch
+10,cell
+11,Pearson
+12,tManders_red_ch
+13,tManders_green-ch
+14,Li(ICQ)
+15,Kendall_tau
+16,Spearman
+17,warning
