@@ -66,8 +66,12 @@ if (length(results_file) > 1){
 
 if (length(results_file) == 0){
   results_file <- file.choose()
+  workingDir <- dirname(results_file)
 }
 
+#channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
+# in the following code, the regexpr() function returns position and lenght of the substring, the regmatches() function extracts the actual substring
+channel <- regmatches(results_file, regexpr("channel [0-9]", results_file))
 data_table <- data.table(read.csv(file = results_file, header = TRUE, sep = ",", quote = "", dec = ".", comment.char = "#"))
 
 for (col in names(data_table))
@@ -118,6 +122,12 @@ for (EXP in unique(data_table$exp_code)){
   EXP_dir <- file.path(workingDir, glue("analysis/{EXP}"))
   if (!file.exists(EXP_dir))
     dir.create(EXP_dir)
+  channel_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}"))
+  if (!file.exists(channel_dir))
+    dir.create(channel_dir)
+  pdf_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/pdf_boxplots"))
+  if (!file.exists(pdf_dir))
+    dir.create(pdf_dir)
 }
 ```
 
@@ -175,8 +185,9 @@ for (EXP in unique(data_table$exp_code)){
 
   # order the summary table by the category selected and save it as an xlsx file
   setorderv(summary, cols = sorting_col)
-  out_file <- glue("analysis/summary_{EXP}.xlsx")
-  writexl::write_xlsx(as.data.frame(summary), path = here("", out_file))
+  out_file <- glue("/analysis/summary_{EXP}_{channel}.xlsx")
+#  writexl::write_xlsx(as.data.frame(summary), path = here("", out_file))
+  writexl::write_xlsx(as.data.frame(summary), path = workingDir + out_file)
 
   # create and save results tables for each quantified parameter, print data for each biological replicate into a separate column
   # the ordering of the table is kept
@@ -186,8 +197,9 @@ for (EXP in unique(data_table$exp_code)){
     subset_columns <- c("BR_date", parameters, COL)
     summary_subset <- summary[, ..subset_columns]
     summary_wide <- reshape(summary_subset, idvar = parameters, timevar = "BR_date", direction = "wide")
-    out_file <- glue("analysis/{EXP}/{COL}.xlsx")
-    writexl::write_xlsx(as.data.frame(summary_wide), path = here("", out_file))
+    out_file <- glue("/analysis/{EXP}/{channel}/{COL}.xlsx")
+#writexl::write_xlsx(as.data.frame(summary_wide), path = here("", out_file))
+    writexl::write_xlsx(as.data.frame(summary_wide), path = workingDir + out_file)
   }
 
   # count the number of cells in each group and save a table with the counts
@@ -197,8 +209,9 @@ for (EXP in unique(data_table$exp_code)){
     reshape(idvar = parameters, timevar = "BR_date", direction = "wide")
   assign(paste0("cell_counts_", EXP), cell_counts)
   setorderv(cell_counts, cols = sorting_col)
-  out_file <- glue("analysis/cell_counts_{EXP}.xlsx")
-  writexl::write_xlsx(as.data.frame(cell_counts), path = here("", out_file))
+  out_file <- glue("/analysis/cell_counts_{EXP}_{channel}.xlsx")
+#  writexl::write_xlsx(as.data.frame(cell_counts), path = here("", out_file))
+   writexl::write_xlsx(as.data.frame(cell_counts), path = workingDir + out_file)
 }
 ```
 
@@ -300,9 +313,11 @@ for (EXP in unique(data_table$exp_code)){
       }
     if (length(terms_extra_choices))
       descr <- paste0("_", terms_extra_choices, collapse = "")
-    out_file <- glue("analysis/{EXP}/{COL}{descr}.png")
+#    out_file <- glue("analysis/{EXP}/{channel}/{COL}{descr}.png")
+    out_file <- glue("{workingDir}/analysis/{EXP}/{channel}/{COL}{descr}.png")
     ggsave(out_file, figure, device = "png", width = fig_width, height = fig_height)
-    out_file <- glue("analysis/{EXP}/{COL}{descr}.pdf")
+#    out_file <- glue("analysis/{EXP}/{channel}/pdf_boxplots/{COL}{descr}.pdf")
+    out_file <- glue("{workingDir}/analysis/{EXP}/{channel}/pdf_boxplots/{COL}{descr}.pdf")
     ggsave(out_file, figure, device = "pdf", width = fig_width, height = fig_height)
   }
 }
@@ -387,7 +402,9 @@ for (EXP in unique(data_table$exp_code)){
       )
       if (nchar(terms[2]) > 0)
          fig_width <- fig_width*2
-      figure_file <- here(glue("analysis/{EXP}_{GRAPH}_{FACET}.png"))
+#      figure_file <- here(glue("analysis/{EXP}/{channel}/{GRAPH}_{FACET}.png"))
+      figure_file <- glue("{workingDir}/analysis/{EXP}/{channel}/{GRAPH}_{FACET}.png") 
+      
       ggsave(figure_file, figure, device = "png", width = fig_width, height = fig_height)
     }
   }
@@ -420,7 +437,8 @@ for (EXP in unique(data_table$exp_code)){
     for (COL in columns_mean){
       if (length(unique(summary_filtered[[COL]])) > 1){
         p_threshold <- 0.05
-        out_file_stat <- glue("analysis/{EXP}/{COL}_statistical_analysis.txt")
+#        out_file_stat <- glue("analysis/{EXP}/{channel}/{COL}_statistical_analysis.txt")
+        out_file_stat <- glue("{workingDir}/analysis/{EXP}/{channel}/{COL}_statistical_analysis.txt")
         write(paste0("Statistical analysis report for: ", COL, "\n", "p-adj threshold: ", p_threshold, "\n\n"), file = out_file_stat)
         
         
