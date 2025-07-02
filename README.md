@@ -29,15 +29,14 @@ The macros require additional plugins/libraries that are not part of the general
 
 ---
 
-## Citation
-
-Jakub Zahumensky, Jan Malinsky — **Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis**\
-*Biology Methods and Protocols*, Volume 9, Issue 1, 2024, bpae075\
-https://doi.org/10.1093/biomethods/bpae075
-
-
 ## Copyright
 The codes and scripts are available under the CC BY-NC licence. The users are free to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes. Attribution to the creator is required.  
 
 ## Non-Liability Disclaimer
 The software is provided “as is”, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+
+## Citation
+**Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis**\
+Jakub Zahumensky, Jan Malinsky\
+*Biology Methods and Protocols*, Volume 9, Issue 1, 2024, bpae075\
+https://doi.org/10.1093/biomethods/bpae075
