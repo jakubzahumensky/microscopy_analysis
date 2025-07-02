@@ -1,4 +1,5 @@
-# Automated analysis of microscopy data - from images to numbers and plots
+# Automated analysis of microscopy data – From images to numbers and plots
+
 This repository contains custom **Fiji (ImageJ)** macros and **R scripts (markdown)** that we have developed for automatic analysis of microscopy images. The required data structure and use of the code is described in detail in: **Zahumensky J., Malinsky J. Live cell fluorescence microscopy—an end-to-end workflow for high-throughput image and data analysis**. *Biology Methods and Protocols*, Volume 9, Issue 1, 2024, bpae075, 
 (doi: https://doi.org/10.1093/biomethods/bpae075).
 
