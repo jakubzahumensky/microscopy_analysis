@@ -169,10 +169,10 @@ if (isOpen("Log") && RoiSet_count > 0){
 	+"<i>in tangential images</i>:<br>"
 	+"&#8226; on the <b>edge</b> of the visible cell (Fig. 3)<br>"
 	+"<br>"
-	+"<img src=\"https://raw.githubusercontent.com/jakubzahumensky/testing/main/Fig.1.png?raw=true\" alt=\"Fig 1\" width=256 height=256> <b>Fig. 1</b> "
-	+"<img src=\"https://raw.githubusercontent.com/jakubzahumensky/testing/main/Fig.2.png?raw=true\" alt=\"Fig 2\" width=256 height=256> <b>Fig. 2</b> "
+	+"<img src=\"https://github.com/jakubzahumensky/microscopy_analysis/blob/main/Fiji%20macros/figs/Fig.1.png?raw=true?raw=true\" alt=\"Fig 1\" width=256 height=256> <b>Fig. 1</b> "
+	+"<img src=\"https://github.com/jakubzahumensky/microscopy_analysis/blob/main/Fiji%20macros/figs/Fig.2.png?raw=true?raw=true\" alt=\"Fig 2\" width=256 height=256> <b>Fig. 2</b> "
 	+"<br>"
-	+"<img src=\"https://raw.githubusercontent.com/jakubzahumensky/testing/main/Fig.3.png?raw=true\" alt=\"Fig 3\" width=256 height=256> <b>Fig. 3</b> "
+	+"<img src=\"https://github.com/jakubzahumensky/microscopy_analysis/blob/main/Fiji%20macros/figs/Fig.3.png?raw=true?raw=true\" alt=\"Fig 3\" width=256 height=256> <b>Fig. 3</b> "
 	+"<br>"
 	+"<i>ROIs deviating from these guidelines will result in incorrect quantification.</i><br>"
 	+"</html>";
