@@ -548,7 +548,7 @@ function analyze_tangential(file){
 			number_of_foci = 0; // initial value
 			run("Clear Results");
 			run("Find Maxima...", "prominence=foci_prominence exclude output=Count");
-			if (cell[4] > CV_threshold) // [4] - cell intensity CV; if the CV is not greater than CV_threshold (set by the user in the initial Dialog window), the cells are deemed to have no microdomains
+			if (cell[4] > CV) // [4] - cell intensity CV; if the CV is not greater than CV (set by the user in the initial Dialog window), the cells are deemed to have no microdomains
 				number_of_foci = getResult("Count", 0);
 			foci_density_find_maxima = number_of_foci/cell[0];
 			// foci quantification using thresholding and the "Analyze particles..." plugin
