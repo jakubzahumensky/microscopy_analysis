@@ -209,7 +209,8 @@ function correctDriftAndBleaching(){
 			
 //			run("StackReg", "transformation=[Translation]"); // Enable the BIG-EPFL update site to gain access to the StackReg plugin.
 			run("StackReg ", "transformation=Translation");
-			autocrop(temp_image_name); // function defined below that crops the image to olny keep the parts that were imaged in each frame of the series; required for the bleach correction to work properly
+			if (selectionType >= 0)
+				autocrop(temp_image_name); // function defined below that crops the image to olny keep the parts that were imaged in each frame of the series; required for the bleach correction to work properly
 			// perform bleach correction using selected algorithm, if desired
 
 			if (bleach_correct != "none"){
