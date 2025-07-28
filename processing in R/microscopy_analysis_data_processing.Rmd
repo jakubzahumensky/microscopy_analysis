@@ -63,11 +63,12 @@ if (length(results_file) == 0){
   workingDir <- dirname(results_file)
 }
 
-#channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
+# channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
 # in the following code, the regexpr() function returns position and length of the substring, the regmatches() function extracts the actual substring
 channel <- regmatches(results_file, regexpr("channel [0-9]", results_file))
 data_table <- data.table(read.csv(file = results_file, header = TRUE, sep = ",", quote = "", dec = ".", comment.char = "#"))
 
+# Rename 'control' to '_control'; this way the control sample appears first (leftmost) in the graphs and analyses
 for (col in names(data_table))
   set(data_table, i = which(data_table[[col]] == "control"), j = col, value = "_control")
 ```
@@ -75,22 +76,19 @@ for (col in names(data_table))
 From the column names, we extract the names of those that describe the data files, including the biological replicate date (all columns between the *exp_code* and *frame* columns) and of those that contain the results of the analysis (all columns after *frame*):
 
 ```{r "Sort columns into descriptive and quantified parameters"}
-# extract the position of important columns
-frame_column <- which(colnames(data_table)=="frame") # this columns is always present and "divides" the table into descriptive and quantification part
+# Find the position of the 'frame' column
+# This column separates descriptive data (on the left) from measurement data (on the right)
+frame_column <- which(colnames(data_table)=="frame")
+
+# Get total number of columns (i.e., position of the last column)
 last_column <- ncol(data_table)
 
-# columns with parameters that describe the data files; used for filtering into unique combinations
-# first column is excluded here as it contains the experiment code, which is handled at a different level than the other description parameters
-parameters <- c()
-for (i in 3:frame_column-1){
-  parameters[i-2] <- colnames(data_table)[i]
-}
+# Get names of descriptive columns (used to identify unique samples)
+# Skip the first two columns: the first has experiment codes, the second has replicate dates
+parameters <- colnames(data_table)[3:(frame_column-1)]
 
-# columns with quantification data from which means and SDs are calculated below
-columns <- c()
-for (i in frame_column+1:last_column-frame_column){
-  columns[i-frame_column] <- colnames(data_table)[i]
-}
+# Get names of columns with measurement data (used to calculate means and SDs)
+columns <- colnames(data_table)[(frame_column+1):last_column]
 ```
 
 The following information was loaded from their *Results table*: experiment codes, descriptive parameters and quantification parameters
