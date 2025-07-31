@@ -39,9 +39,10 @@ test = 0;
 //test = 1;
 if (test == 0)
 	setBatchMode(true);
+
 default_subset = "";
 default_directory = "";
-//default_directory = "D:/Yeast/EXPERIMENTAL/microscopy/JZ-M-073-250218 - Pil1 vs TORC1 inhibition (RAP)/250218/";
+//default_directory = "D:/Yeast/EXPERIMENTAL/mol_bio/JZ-MB-021-241007 - tag Atg8 w GFP (N-term) in eisosomal mutants/BY4741/microscopy/250730 - from plates/";
 
 // Definitions of initial variables used in the macro below.
 var extension_list = newArray("czi", "oif", "lif", "tif", "vsi"); // only files with these extensions will be processed; if your filetype is not in the group, simply add it
@@ -407,11 +408,11 @@ function measure_background(image_title){
 	run("Measure");
 	run("Select None");
 	// the mean intensity is measured as the background estimate for the raw image and returned by the function
-	background_image = getResult("Mean", 1);
+	image_background = getResult("Mean", 1);
 	close("DUP-CROP-background");
 	close("DUP-CROP");
 	close("Result of DUP-CROP");
-	return background_image;
+	return image_background;
 }
 
 // analyze transversal images
@@ -428,7 +429,7 @@ function analyze_transversal(file){
 		init = numROIs - 4;
 	// for each cell (ROI) measure: area, integrated_intensity, mean_intensity, intensity_SD (standard deviation of the mean), intensity_CV (coefficient of variance)
 	// all reported intensities are corrected for background
-	for(j = init; j < numROIs; j++){
+	for (j = init; j < numROIs; j++){
 		// measure cell parameters from raw image:
 		// [0] - area, [1] - integrated_intensity_background, [2] - mean_intensity_background, [3] - SD, [4] - CV, [5] - major axis, [6] - minor axis, [7] - eccentricity
 		// 0.166 makes the ROI slightly bigger to include the whole plasma membrane; the enlarged ROI is used to make a ROI mask below
@@ -458,6 +459,24 @@ function analyze_transversal(file){
 			plasma_membrane_DIV_cytosol = plasma_membrane[2]/cytosol[2]; // ratio of MEAN fluorescence intensities in the plasma mebrane and in the cytosol
 			cytosol_DIV_cell_integrated = cytosol[1]/cell[1]; // ratio of integrated fluorescence intensities in the cytosol and the whole cell (ROI)
 			plasma_membrane_DIV_cell_integrated = plasma_membrane[1]/cell[1]; // ratio of integrated fluorescence intensities in the plasma membrane and the whole cell (ROI)
+			
+			selectWindow(list[i]);
+			select_ROI(j);
+			run("Duplicate...", "duplicate channels=" + ch);
+			getStatistics(ROI_area, ROI_mean, ROI_min, ROI_max, ROI_std, ROI_histogram);
+			run("Select None");
+			setThreshold((2*ROI_mean+ROI_max-2*background)/2, 65535, "raw");
+			run("Convert to Mask", "background=Dark");
+			foci_mask = "internal foci mask";
+			rename(foci_mask);
+			run("Despeckle");
+			run("Analyze Particles...", "size=0.01225-0.Infinity circularity=0.00-1.00 show=Masks display clear summarize");
+			Table.rename("Summary", "Results");
+			internal_foci_count = getResult("Count", 0);
+			internal_foci_average_size = replace(getResult("Average Size", 0), "NaN", 0);
+			internal_foci_total_area = getResult("Total Area", 0);
+			close(foci_mask);
+			
 			// only calculate the following parameters if "yes" was selected for "quantify microdomains" in the inital dialog window
 			// this saves time if the experimenter is not interested in plasma membrane microdomains
 			if (microdomains == "yes"){
@@ -502,7 +521,10 @@ function analyze_transversal(file){
 				+","+ count_foci_from_thresholding_CLAHE[0] +","+ count_foci_from_thresholding_CLAHE[1]
 				+","+ count_foci_from_thresholding_dotfind[0] +","+ count_foci_from_thresholding_dotfind[1]
 				+","+ watershed_foci[0] +","+ watershed_foci[1]
-				+","+ protein_fraction_in_foci;
+				+","+ protein_fraction_in_foci
+				+","+ internal_foci_count
+				+","+ internal_foci_average_size
+				+","+ internal_foci_total_area;
 			cell_res = cell_res + "\n";
 			print("[" + temp_file + "]", cell_res);
 
@@ -737,7 +759,11 @@ function print_header(){
 				+ ",foci_threshold_CLAHE,foci_density_threshold_CLAHE"
 				+ ",foci_threshold_dotfind,foci_density_threshold_dotfind"
 				+ ",foci_from_watershed,foci_density_from_watershed"
-				+ ",protein_in_microdomains[%]";
+				+ ",protein_in_microdomains[%]"
+				+ ",internal_foci_count"
+				+ ",internal_foci_average_size"
+				+ ",internal_foci_total_area";
+;
 	// the following parameters are quantified only in the tangential images
 	// in this case, microdomains are always quantified
 	} else
