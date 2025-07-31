@@ -14,7 +14,7 @@ Install and load required packages
 
 ```{r}
 # the following packages are required for:
-# 'data.table' - work with data tables
+# 'data.table' - work with data tables (enhanced version of the data.frame)
 # 'dplyr' - the %>% piping tool and summarise() function
 # 'svDialogs' - interactive dialog windows
 # 'ggplot2' - basic graphs
