@@ -22,7 +22,7 @@ setBatchMode(true); // starts batch mode, i.e. no images are shown on the screen
 /* definitions of constants used in the macro below */
 image_name = "image";
 n = 0; // initial counter value (used to report the running number of the current image)
-dir_type = "-raw/"; // only images stored in directories whose names end with "-raw" are processed
+var dir_type = "data"; // only images stored in directories whose names end with "-raw" are processed
 // definition of options that will be given to the user for the correction and projection
 bleach_correction_method = newArray("none", "Histogram Matching", "Simple Ratio"); // there is another bleach correction in ImageJ called "Exponential Fit", but has been omitted here, since it has a tendency to stop the macro
 projection_type = newArray("none", "AVERAGE", "MAX", "SUM", "all"); // options for z-projection after drift (and bleach) correction
@@ -83,6 +83,7 @@ wrapUp();
 	Dialog.create("Correct drift and bleach, calculate projection");
 		Dialog.addMessage("Note: Images with following extensions are processed: " + String.join(extension_list) + ". \nIf your files have another extension, please add it to the 'extension_list' array in line 23.");
 		Dialog.addDirectory("Directory:", "");
+		Dialog.addString("Directory type", dir_type)
 		Dialog.addChoice("Correct bleaching:", bleach_correction_method);
 		Dialog.addChoice("Projection:", projection_type);
 		Dialog.addChoice("Overwrite previously processed images:", boolean);
@@ -90,10 +91,10 @@ wrapUp();
 		Dialog.addHelp(help);
 		Dialog.show();
 		dir = fixFolderInput(Dialog.getString());
+		dir_type = Dialog.getString();
 		bleach_correct = Dialog.getChoice;
 		projection = Dialog.getChoice();
 		overwrite = Dialog.getChoice;
-		
 }
 
 /* Convert backslash to slash in the folder path, append a slash at the end.
@@ -119,6 +120,25 @@ function initialize(){
 	run("Text Window...", "name=[Status] width=100 height=3");
 }
 
+
+// count all files that satisfy the given conditions of placement (in a dir ending with "-raw") and extension (in the 'extension_list' variable)
+function countFiles(dir){
+	list = getFileList(dir);
+	// same basic concept and structure as the proccessFolder(dir) function above
+	for (i = 0; i < list.length; i++){
+		if (endsWith(list[i], "/"))
+			countFiles("" + dir + list[i]);
+		else {
+			q = dir + list[i];
+			extIndex = lastIndexOf(q, ".");
+			ext = substring(q, extIndex + 1);
+			if (contains(extension_list, ext) && endsWith(dir, dir_type+"/"))
+				count++;
+		}
+	}
+	return count;
+}
+
 /****************************************************************************************************************************************************/
 /* BASIC STRUCTURE FOR RECURSIVE DATA PROCESSING
  *
@@ -132,8 +152,8 @@ function processFolder(dir){
 		if (endsWith(list[i], "/")) // if the list item is a folder, go in and get a list of items
 			processFolder("" + dir + list[i]);
 		else {	// if an item is not a folder, it is a file - get its name with the whole path
-			if (endsWith(dir, dir_type)){ // if the folder name ends with a string assigned to the dir_type variable
-				showProgress(n + + , count);
+			if (endsWith(dir, dir_type + "/")){ // if the folder name ends with a string assigned to the dir_type variable
+				showProgress(n++ , count);
 				q = dir + list[i];
 				extIndex = lastIndexOf(q, ".");
 				ext = substring(q, extIndex + 1); // store file extension of file "q" into the "ext" variable
@@ -164,8 +184,8 @@ function processFile(q){
 
 function prepareFolders(){
 	// Check if the required directories exist. If not, create them. The corrected images will be stored in these.
-	dir_projections = File.getParent(dir) + "/" + replace(File.getName(dir), "-raw", "-projections") + "/";
-	dir_data = File.getParent(dir) + "/" + replace(File.getName(dir), "-raw", "-processed") + "/";
+	dir_projections = File.getParent(dir) + "/" + replace(File.getName(dir), dir_type, "data-projections");
+	dir_data = File.getParent(dir) + "/" + replace(File.getName(dir), dir_type, "data-processed");
 	if (!File.exists(dir_data))
 		File.makeDirectory(dir_data);
 	if (!File.exists(dir_projections) && (projection != "none"))
@@ -225,7 +245,7 @@ function correctDriftAndBleaching(){
 		// put the processed channels back together, save the result and rename the image for further work
 		if (channels > 1)
 			run("Merge Channels...", "c1=[C1-image] c2=[C2-image] create"); //this merges the channel in a way that red is ch1 and green is ch2
-		saveAs("TIFF", dir_data + list[i] + "-processed");
+		saveAs("TIFF", dir_data + "/" + list[i] + "-processed");
 	}
 }
 
@@ -235,21 +255,21 @@ function calculateProjections(){
 		selectWindow("merged");
 		run("Duplicate...", "duplicate");
 		run("Z Project...", "projection=[Average Intensity]");
-		saveAs("TIFF", dir_projections + list[i] + "-AVG");
+		saveAs("TIFF", dir_projections + "/" + list[i] + "-AVG");
 		close();
 	}
 	if (projection == "MAX" || projection == "all"){ // calculate MAX projection if "MAX" or "all" was selected in the initial dialog window
 		selectWindow("merged");
 		run("Duplicate...", "duplicate");
 		run("Z Project...", "projection=[Max Intensity]");
-		saveAs("TIFF", dir_projections + list[i] + "-MAX");
+		saveAs("TIFF", dir_projections + "/" + list[i] + "-MAX");
 		close();
 	}
 	if (projection == "SUM" || projection == "all"){ // calculate SUM projection if "SUM" or "all" was selected in the initial dialog window
 		selectWindow("merged");
 		run("Duplicate...", "duplicate");
 		run("Z Project...", "projection=[Sum Slices]");
-		saveAs("TIFF", dir_projections + list[i] + "-SUM");
+		saveAs("TIFF", dir_projections + "/" + list[i] + "-SUM");
 		close();
 	}
 }
@@ -284,23 +304,6 @@ function contains(array, value){
  	return false;
 }
 
-// count all files that satisfy the given conditions of placement (in a dir ending with "-raw") and extension (in the 'extension_list' variable)
-function countFiles(dir){
-	list = getFileList(dir);
-	// same basic concept and structure as the proccessFolder(dir) function above
-	for (i = 0; i < list.length; i++){
-		if (endsWith(list[i], "/"))
-			countFiles("" + dir + list[i]);
-		else {
-			q = dir + list[i];
-			extIndex = lastIndexOf(q, ".");
-			ext = substring(q, extIndex + 1);
-			if (contains(extension_list, ext) && endsWith(dir, dir_type))
-				count++;
-		}
-	}
-	return count;
-}
 
 /* Close all open image windows and specific text windows that might be open. */
 function closeAllWindows(){
