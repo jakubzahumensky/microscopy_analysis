@@ -22,24 +22,28 @@ setBatchMode(true); // starts batch mode, i.e. no images are shown on the screen
 /* definitions of constants used in the macro below */
 image_name = "image";
 n = 0; // initial counter value (used to report the running number of the current image)
-var dir_type = "data"; // only images stored in directories whose names end with "-raw" are processed
+var data_dir_name = "data"; // only images stored in directories whose names end with "-raw" are processed
+projections_dir_name = "data-projections";
+processed_dir_name = "data-processed";
 // definition of options that will be given to the user for the correction and projection
-bleach_correction_method = newArray("none", "Histogram Matching", "Simple Ratio"); // there is another bleach correction in ImageJ called "Exponential Fit", but has been omitted here, since it has a tendency to stop the macro
-projection_type = newArray("none", "AVERAGE", "MAX", "SUM", "all"); // options for z-projection after drift (and bleach) correction
+bleach_correctionion_method = newArray("none", "Histogram Matching", "Simple Ratio"); // there is another bleach correction in ImageJ called "Exponential Fit", but has been omitted here, since it has a tendency to stop the macro
+projection_type = newArray("none", "AVERAGE", "MAX", "MIN", "SUM", "all"); // options for z-projection after drift (and bleach) correction
 boolean = newArray("no", "yes");
 
 var extension_list = newArray("czi", "oif", "lif", "vsi", "tif"); // only files with these extensions will be processed; if your microscopy images are in a different format, add the extension to the list
+extension_list_line = 33;
 var dir = "";
-var bleach_correct = "";
+var bleach_correction = "";
 var projection = "";
 var overwrite = "";
 var dir_projections = "";
-var	dir_data = "";
+var	dir_processed = "";
 var channels = 0;
 var slices = 0;
 var width = 0;
 var height = 0;
 var count = 0;
+
 
 /****************************************************************************************************************************************************/
 /* CORE PROGRAM */
@@ -49,6 +53,7 @@ initialize();
 processFolder(dir);
 closeAllWindows();
 wrapUp();
+
 
 /****************************************************************************************************************************************************/
 /* INITIAL DIALOG WINDOW TO TAKE USER INPUT
@@ -63,6 +68,9 @@ wrapUp();
 		 + "The macro works <u>recursively</u>, i.e., it looks into all <i>sub</i>folders. "
 		 + "All folders with names <u>ending</u> with \"<i>-raw</i>\" (and only these) are processed. "
 		 + "All other folders are ignored. <br><br>"
+		
+		 + "<b>Data directory name</b><br>"
+		 + "Specify the name of directory (directories) where images to be processed are stored (typically 'data' or 'data-raw'. <br><br>"
 		
 		 + "<b>Correct bleaching</b><br>"
 		 + "Select what algorithm (if any) you wish to use to correct bleaching of your image sequences. "
@@ -81,21 +89,23 @@ wrapUp();
 		
 		 + "</html>";
 	Dialog.create("Correct drift and bleach, calculate projection");
-		Dialog.addMessage("Note: Images with following extensions are processed: " + String.join(extension_list) + ". \nIf your files have another extension, please add it to the 'extension_list' array in line 23.");
+		Dialog.addMessage("Note: Images with following extensions are processed: " + String.join(extension_list) + ". \n"
+			+ "If your files have another extension, please add it to the 'extension_list' array in line " + extension_list_line + ".");
 		Dialog.addDirectory("Directory:", "");
-		Dialog.addString("Directory type", dir_type)
-		Dialog.addChoice("Correct bleaching:", bleach_correction_method);
+		Dialog.addString("Data directory name", data_dir_name)
+		Dialog.addChoice("Correct bleaching:", bleach_correctionion_method);
 		Dialog.addChoice("Projection:", projection_type);
 		Dialog.addChoice("Overwrite previously processed images:", boolean);
 		Dialog.addMessage("Click \"Help\" for more information on the parameters.");
 		Dialog.addHelp(help);
 		Dialog.show();
 		dir = fixFolderInput(Dialog.getString());
-		dir_type = Dialog.getString();
-		bleach_correct = Dialog.getChoice;
+		data_dir_name = Dialog.getString();
+		bleach_correction = Dialog.getChoice;
 		projection = Dialog.getChoice();
 		overwrite = Dialog.getChoice;
 }
+
 
 /* Convert backslash to slash in the folder path, append a slash at the end.
  * If analysis is run from within the data folder, move one level up.
@@ -114,7 +124,9 @@ function fixFolderInput(folder_input){
 function initialize(){
 	// count the number of images to be processed (used for the status window) - those that have an extension listed in the 'extension_list' array variable (line 18)
 	if (countFiles(dir) == 0)
-		exit("Nothing to process. Check that images to be processed are stored in directories whose names end with \"-raw\", and that the extension of your files in included in the 'extension_list' variable on line 18 of the code.");
+		exit("Nothing to process.\n"
+			+ "Check that images to be processed are stored in the directories specified in the 'Data directory name' field of the initial Dialog window,\n"
+			+ "and that the extension of your files is included in the 'extension_list' variable on line " + extension_list_line + " of the code.");
 
 	// create a status text window where the progress of the macro is reported
 	run("Text Window...", "name=[Status] width=100 height=3");
@@ -132,12 +144,13 @@ function countFiles(dir){
 			q = dir + list[i];
 			extIndex = lastIndexOf(q, ".");
 			ext = substring(q, extIndex + 1);
-			if (contains(extension_list, ext) && endsWith(dir, dir_type+"/"))
+			if (contains(extension_list, ext) && endsWith(dir, data_dir_name+"/"))
 				count++;
 		}
 	}
 	return count;
 }
+
 
 /****************************************************************************************************************************************************/
 /* BASIC STRUCTURE FOR RECURSIVE DATA PROCESSING
@@ -152,7 +165,7 @@ function processFolder(dir){
 		if (endsWith(list[i], "/")) // if the list item is a folder, go in and get a list of items
 			processFolder("" + dir + list[i]);
 		else {	// if an item is not a folder, it is a file - get its name with the whole path
-			if (endsWith(dir, dir_type + "/")){ // if the folder name ends with a string assigned to the dir_type variable
+			if (endsWith(dir, data_dir_name + "/")){ // if the folder name ends with a string assigned to the data_dir_name variable
 				showProgress(n++ , count);
 				q = dir + list[i];
 				extIndex = lastIndexOf(q, ".");
@@ -170,6 +183,14 @@ function processFolder(dir){
 	}
 }
 
+// check if an array contains a specified string; can be used for subsetting
+function contains(array, value){
+	for (i = 0; i < array.length; i++)
+		if (array[i] == value) return true;
+ 	return false;
+}
+
+
 // the following operations are performed with each image
 function processFile(q){
 	prepareFolders();
@@ -177,20 +198,21 @@ function processFile(q){
 	rename(image_name);
 	removeBlackSlices();
 	correctDriftAndBleaching();
-	rename("merged");
 	calculateProjections();
 	close("*");
 }
 
+
 function prepareFolders(){
 	// Check if the required directories exist. If not, create them. The corrected images will be stored in these.
-	dir_projections = File.getParent(dir) + "/" + replace(File.getName(dir), dir_type, "data-projections");
-	dir_data = File.getParent(dir) + "/" + replace(File.getName(dir), dir_type, "data-processed");
-	if (!File.exists(dir_data))
-		File.makeDirectory(dir_data);
+	dir_projections = File.getParent(dir) + "/" + replace(File.getName(dir), data_dir_name, projections_dir_name) + "/";
+	dir_processed = File.getParent(dir) + "/" + replace(File.getName(dir), data_dir_name, processed_dir_name) + "/";
+	if (!File.exists(dir_processed))
+		File.makeDirectory(dir_processed);
 	if (!File.exists(dir_projections) && (projection != "none"))
 		File.makeDirectory(dir_projections);
 }
+
 
 function removeBlackSlices(){
 	getDimensions(width, height, channels, slices, frames);
@@ -200,79 +222,38 @@ function removeBlackSlices(){
 		run("Clear Results");
 		run("Measure");
 		MAX = getResult("Max", 0);
-			if (MAX == 0){
-				run("Delete Slice", "delete=slice");
-				for (c = 1; c < channels; c++)
-					s--;
-			// stop checking when a non-blank slice is encountered
-			} else
-				break;
+		if (MAX == 0){
+			run("Delete Slice", "delete=slice");
+			for (c = 1; c < channels; c++)
+				s--;
+		// stop checking when a non-blank slice is encountered
+		} else
+			break;
 	}
 }	
 
+
 function correctDriftAndBleaching(){
 // perform 1. drift and 2. bleach correction separately for each channel, then put the channels back together
-	if (!File.exists(dir_data + list[i] + "-processed.tif") || overwrite == "yes"){
+	if (!File.exists(dir_processed + list[i] + "-processed.tif") || overwrite == "yes"){
 		if (channels > 1)
 			run("Split Channels");
-		for (j = 1; j <= channels; j++){
+		for (ch = 1; ch <= channels; ch++){
 			temp_image_name = image_name;
 			if (channels > 1)
-				temp_image_name = "C" + j + "-" + image_name;
+				temp_image_name = "C" + ch + "-" + image_name;
 			selectImage(temp_image_name);
-
-			if (bleach_correct != "none"){
-				selectWindow(temp_image_name);
-				if (slices*channels > 1)
-					run("Bleach Correction", "correction=[" + bleach_correct + "]");
-			}
-			
-//			run("StackReg", "transformation=[Translation]"); // Enable the BIG-EPFL update site to gain access to the StackReg plugin.
+			correctBleaching(bleach_correction);
 			run("StackReg ", "transformation=Translation");
-			if (selectionType >= 0)
-				autocrop(temp_image_name); // function defined below that crops the image to olny keep the parts that were imaged in each frame of the series; required for the bleach correction to work properly
-			// perform bleach correction using selected algorithm, if desired
-
-			if (bleach_correct != "none"){
-				selectWindow(temp_image_name);
-				if (slices*channels > 1)
-					run("Bleach Correction", "correction=[" + bleach_correct + "]"); //creates a duplicate image with "DUP_" prefix
-				close(temp_image_name);
-				selectWindow("DUP_" + temp_image_name);
-				rename(temp_image_name);
-			}
+			autocrop(temp_image_name); // function defined below that crops the image to olny keep the parts that were imaged in each frame of the series; required for the bleach correction to work properly
+			correctBleaching(bleach_correction);
 		}
-		// put the processed channels back together, save the result and rename the image for further work
-		if (channels > 1)
-			run("Merge Channels...", "c1=[C1-image] c2=[C2-image] create"); //this merges the channel in a way that red is ch1 and green is ch2
-		saveAs("TIFF", dir_data + "/" + list[i] + "-processed");
+		mergeChannels();
+		saveAs("TIFF", dir_processed + list[i] + "-processed");
 	}
 }
 
-function calculateProjections(){
-	// calculate selected projections
-	if (projection == "AVERAGE" || projection == "all"){ // calculate AVG projection if "AVG" or "all" was selected in the initial dialog window
-		selectWindow("merged");
-		run("Duplicate...", "duplicate");
-		run("Z Project...", "projection=[Average Intensity]");
-		saveAs("TIFF", dir_projections + "/" + list[i] + "-AVG");
-		close();
-	}
-	if (projection == "MAX" || projection == "all"){ // calculate MAX projection if "MAX" or "all" was selected in the initial dialog window
-		selectWindow("merged");
-		run("Duplicate...", "duplicate");
-		run("Z Project...", "projection=[Max Intensity]");
-		saveAs("TIFF", dir_projections + "/" + list[i] + "-MAX");
-		close();
-	}
-	if (projection == "SUM" || projection == "all"){ // calculate SUM projection if "SUM" or "all" was selected in the initial dialog window
-		selectWindow("merged");
-		run("Duplicate...", "duplicate");
-		run("Z Project...", "projection=[Sum Slices]");
-		saveAs("TIFF", dir_projections + "/" + list[i] + "-SUM");
-		close();
-	}
-}
+
 // function to crop the image to only keep the parts that were imaged in each frame of the series
 function autocrop(j_img){
 	selectImage(j_img);
@@ -290,18 +271,71 @@ function autocrop(j_img){
 		if (MIN == 0){
 			selectImage(j_img);
 			run("Restore Selection");
-			run("Make Inverse");
-			run("Crop");
+			if (selectionType >= 0)
+				run("Make Inverse");
+				run("Crop");
 		}
 	}
 }
 
-// helper function
-// check if an array contains a specified string; can be used for subsetting
-function contains(array, value){
-	for (i = 0; i < array.length; i++)
-		if (array[i] == value) return true;
- 	return false;
+
+// perform bleach correction using selected algorithm, if desired
+function correctBleaching(bleach_correction){
+	if (bleach_correction != "none"){
+		selectWindow(temp_image_name);
+		if (slices*channels > 1)
+			run("Bleach Correction", "correction=[" + bleach_correction + "]"); //creates a duplicate image with "DUP_" prefix
+		close(temp_image_name);
+		selectWindow("DUP_" + temp_image_name);
+		rename(temp_image_name);
+	}
+}
+
+
+function mergeChannels(){
+	// put the processed channels back together, save the result and rename the image for further work
+	if (channels > 1){
+		run("Merge Channels...", "c1=[C1-image] c2=[C2-image] create"); //this merges the channel in a way that red is ch1 and green is ch2
+		Stack.setDisplayMode("color");
+	}
+	for (ch = channels; ch >= 1; ch--){
+		Stack.setChannel(ch);
+		run("Grays");
+	}
+}
+
+
+// calculate selected projections
+function calculateProjections(){
+	rename("merged");
+	if (projection == "AVERAGE" || projection == "all"){ // calculate AVG projection if "AVG" or "all" was selected in the initial dialog window
+		selectWindow("merged");
+		run("Duplicate...", "duplicate");
+		run("Z Project...", "projection=[Average Intensity]");
+		saveAs("TIFF", dir_projections + list[i] + "-AVG");
+		close();
+	}
+	if (projection == "MAX" || projection == "all"){ // calculate MAX projection if "MAX" or "all" was selected in the initial dialog window
+		selectWindow("merged");
+		run("Duplicate...", "duplicate");
+		run("Z Project...", "projection=[Max Intensity]");
+		saveAs("TIFF", dir_projections + list[i] + "-MAX");
+		close();
+	}
+	if (projection == "MIN" || projection == "all"){ // calculate MAX projection if "MAX" or "all" was selected in the initial dialog window
+		selectWindow("merged");
+		run("Duplicate...", "duplicate");
+		run("Z Project...", "projection=[Min Intensity]");
+		saveAs("TIFF", dir_projections + list[i] + "-MIN");
+		close();
+	}
+	if (projection == "SUM" || projection == "all"){ // calculate SUM projection if "SUM" or "all" was selected in the initial dialog window
+		selectWindow("merged");
+		run("Duplicate...", "duplicate");
+		run("Z Project...", "projection=[Sum Slices]");
+		saveAs("TIFF", dir_projections + list[i] + "-SUM");
+		close();
+	}
 }
 
 
@@ -316,6 +350,7 @@ function closeAllWindows(){
 	if(isOpen("Status"))
 		print("[Status]","\\Close");
 }
+
 
 function wrapUp(){
 	setBatchMode(false);
