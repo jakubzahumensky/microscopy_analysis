@@ -61,7 +61,7 @@ wrapUp();
  * and to select processes: drift and/or bleach correction and various z-projection
  * includes a Help message
  */
- function initialDialogWindow(){
+function initialDialogWindow(){
 	help = "<html>"
 		 + "<b>Directory</b><br>"
 		 + "Specify the directory where you want <i>Fiji</i> to start looking for folders with images. "
@@ -183,7 +183,8 @@ function processFolder(dir){
 	}
 }
 
-// check if an array contains a specified string; can be used for subsetting
+
+/* check if an array contains a specified string; can be used for subsetting */
 function contains(array, value){
 	for (i = 0; i < array.length; i++)
 		if (array[i] == value) return true;
@@ -191,7 +192,6 @@ function contains(array, value){
 }
 
 
-// the following operations are performed with each image
 function processFile(q){
 	prepareFolders();
 	open(q);
@@ -203,8 +203,8 @@ function processFile(q){
 }
 
 
+/* Check if the required directories exist. If not, create them. The corrected images will be stored in these. */
 function prepareFolders(){
-	// Check if the required directories exist. If not, create them. The corrected images will be stored in these.
 	dir_projections = File.getParent(dir) + "/" + replace(File.getName(dir), data_dir_name, projections_dir_name) + "/";
 	dir_processed = File.getParent(dir) + "/" + replace(File.getName(dir), data_dir_name, processed_dir_name) + "/";
 	if (!File.exists(dir_processed))
@@ -214,9 +214,9 @@ function prepareFolders(){
 }
 
 
+/* check the image series (starting at the end). If a slice is blank (can result from aborted z-stacks or time series), delete it. */
 function removeBlackSlices(){
 	getDimensions(width, height, channels, slices, frames);
-	// check the image series (starting at the end). If a slice is blank (can result from aborted z-stacks or time series), delete it.
 	for (s = channels*slices; s >= 1; s--){
 		setSlice(s);
 		run("Clear Results");
@@ -233,8 +233,8 @@ function removeBlackSlices(){
 }	
 
 
+/* perform 1. drift and 2. bleach correction separately for each channel, then put the channels back together */
 function correctDriftAndBleaching(){
-// perform 1. drift and 2. bleach correction separately for each channel, then put the channels back together
 	if (!File.exists(dir_processed + list[i] + "-processed.tif") || overwrite == "yes"){
 		if (channels > 1)
 			run("Split Channels");
@@ -254,7 +254,7 @@ function correctDriftAndBleaching(){
 }
 
 
-// function to crop the image to only keep the parts that were imaged in each frame of the series
+/* crop the image to only keep the parts that were imaged in each frame of the series */
 function autocrop(j_img){
 	selectImage(j_img);
 	// flatten channel j using the Minimum intensity projection to uncover if there are any areas with no signal at the borders of any of the slices in the series
@@ -279,7 +279,7 @@ function autocrop(j_img){
 }
 
 
-// perform bleach correction using selected algorithm, if desired
+/* perform bleach correction using selected algorithm, if desired */
 function correctBleaching(bleach_correction){
 	if (bleach_correction != "none"){
 		selectWindow(temp_image_name);
@@ -291,7 +291,7 @@ function correctBleaching(bleach_correction){
 	}
 }
 
-
+/* merge the corrected channels back together and set LUTs of all channels to Grays */
 function mergeChannels(){
 	// put the processed channels back together, save the result and rename the image for further work
 	if (channels > 1){
@@ -305,7 +305,7 @@ function mergeChannels(){
 }
 
 
-// calculate selected projections
+/* calculate selected projections and save the results */
 function calculateProjections(){
 	rename("merged");
 	if (projection == "AVERAGE" || projection == "all"){ // calculate AVG projection if "AVG" or "all" was selected in the initial dialog window
