@@ -28,21 +28,24 @@ required_packages <- c("here", "knitr", "glue", "data.table", "dplyr",
                        "svDialogs", "ggplot2", "ggstatsplot", "car", "rstatix", "multcomp", "tidyr")
 new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
 if (length(new_packages))
-   install.packages(new_packages)
+   install.packages(new_packages, dependencies = TRUE)
+```
 
+
+```{r}
 # load all required packages
 for (PACKAGE in required_packages){
     library(PACKAGE, character.only = TRUE)
 }
 ```
 
-This script processes a 'Results' table, e.g., from microscopy image analysis, calculating means and SDs of all quantified parameters across experiments, biological replicate dates, strains, cultivation media and times, and conditions. It automatically extracts the column headers and uses them as variable names to store the calculated values (as data frames) and also saves them in the form of tables. The data from individual biological replicates are written into separate columns. The tables can be directly used for plotting in GraphPad Prism, Systat SigmaPlot etc.
+This script processes a `Results table`, e.g., from microscopy image analysis, calculating means and SDs of all quantified parameters across experiments, biological replicate dates, strains, cultivation media and times, and conditions. It automatically extracts the column headers and uses them as variable names to store the calculated values (as data frames) and also saves them in the form of tables. The data from individual biological replicates are written into separate columns. The tables can be directly used for plotting in `GraphPad Prism`, `Systat SigmaPlot` etc.
 
-Scripts for plotting in R are provided as well. Here, also more complex plots are available, where all raw data can be plotted for each biological replicate to create "SuperPlots" and Pirateplots.
+Scripts for plotting in `R` are provided in this `Markdown` as well. Here, also more complex plots are available, where all raw data can be plotted for each biological replicate to create `SuperPlots` and `Pirateplots`.
 
-## Load data from the *Results.csv* file into a data table and look inside
+## Load data from the `Results tablev` file into a data table and look inside
 
-The *Results table* is loaded using known patterns, i.e., the columns are comma-separated, period (.) is used as decimal separator and lines starting with the pound sign (\#) are comments. For verification, the column names are written in the output by the code.
+The `Results table` is loaded using known patterns, i.e., the columns are comma-separated, period `.` is used as decimal separator and lines starting with the pound sign `#` are comments. For verification, the column names are written in the output by the code.
 
 ```{r "Load the 'Results' table"}
 workingDir <- here()
@@ -62,7 +65,11 @@ if (length(results_file) == 0){
   results_file <- file.choose()
   workingDir <- dirname(results_file)
 }
+```
 
+Extract channel number from file name. From the column names, we extract the names of those that describe the data files, including the biological replicate date (all columns between the `exp_code` and `frame` columns) and of those that contain the results of the analysis (all columns after `frame`):
+
+```{r "Load the 'Results' table"}
 # channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
 # in the following code, the regexpr() function returns position and length of the substring, the regmatches() function extracts the actual substring
 channel <- regmatches(results_file, regexpr("channel [0-9]", results_file))
@@ -73,7 +80,6 @@ for (col in names(data_table))
   set(data_table, i = which(data_table[[col]] == "control"), j = col, value = "_control")
 ```
 
-From the column names, we extract the names of those that describe the data files, including the biological replicate date (all columns between the *exp_code* and *frame* columns) and of those that contain the results of the analysis (all columns after *frame*):
 
 ```{r "Sort columns into descriptive and quantified parameters"}
 # Find the position of the 'frame' column
@@ -91,7 +97,7 @@ parameters <- colnames(data_table)[3:(frame_column-1)]
 columns <- colnames(data_table)[(frame_column+1):last_column]
 ```
 
-The following information was loaded from their *Results table*: experiment codes, descriptive parameters and quantification parameters
+The following information was loaded from their `Results table`: experiment codes, descriptive parameters and quantification parameters
 
 ```{r "Inform user of the available parameters", echo = FALSE, collapse = TRUE}
 cat("Results table to be processed:\n")
@@ -106,7 +112,7 @@ columns
 
 ## Data filtering and summarization
 
-Since the analysis can be run across multiple experiments, we first need to separate the *Results table* accordingly and save the summary results, graphs and results of statistical analyses into designated folders. First, we make the necessary folders:
+Since the analysis can be run across multiple experiments, we first need to separate the `Results table` accordingly and save the summary results, graphs and results of statistical analyses into designated folders. First, we make the necessary folders:
 
 ```{r "Make required folders"}
 # if it does not exist already, make a folder for each experiment in the 'Results table'
@@ -127,7 +133,7 @@ for (EXP in unique(data_table$exp_code)){
 }
 ```
 
-We then group the data based on all possible unique combinations of *experiments*, *biological replicate dates* and *descriptive parameters* extracted from the raw image file names during analysis in Fiji. We then calculate the mean and SD for each group and save the summary tables. Note that the *descriptive parameters*:
+We then group the data based on all possible unique combinations of `experiments`, `biological replicate dates` and `descriptive parameters` extracted from the raw image file names during analysis in Fiji. We then calculate the mean and SD for each group and save the summary tables. Note that the `descriptive parameters`:
 
 -   cell types/strains
 -   growth media
@@ -176,6 +182,7 @@ for (EXP in unique(data_table$exp_code)){
   out_file <- glue("/analysis/summary_{EXP}_{channel}.xlsx")
 #  writexl::write_xlsx(as.data.frame(summary), path = here("", out_file))
   writexl::write_xlsx(as.data.frame(summary), path = workingDir + out_file)
+
 
   # create and save results tables for each quantified parameter, print data for each biological replicate into a separate column
   # the ordering of the table is kept
