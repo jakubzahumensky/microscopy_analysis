@@ -359,13 +359,15 @@ function prepare(file){
 		run("Enhance Local Contrast (CLAHE)", "blocksize=8 histogram=64 maximum=3 mask=*None*");
 		run("Unsharp Mask...", "radius=1 mask=0.6");
 		run("Gaussian Blur...", "sigma=Gauss_Sigma");
+	// Basic Gauss smoothing
+	selectWindow(list[i]);
+		run("Duplicate...", "title=DUP_Gauss channels=" + ch);
+		run("Gaussian Blur...", "sigma=Gauss_Sigma");
+
+	
 	// The following are only prepared for transversal images
 	// This is the reason why the analysis of transversal images is approx. an order of magnitute slower than that of tangential images
 	if (matches(image_type, "transversal") && microdomains == "yes"){
-		// Basic Gauss smoothing
-		selectWindow(list[i]);
-			run("Duplicate...", "title=DUP_Gauss channels=" + ch);
-			run("Gaussian Blur...", "sigma=Gauss_Sigma");
 		// Mean smoothing
 		selectWindow(list[i]);
 			run("Duplicate...", "title=DUP_mean channels=" + ch);
@@ -482,11 +484,13 @@ function analyze_transversal(file){
 			
 			// only calculate the following parameters if "yes" was selected for "quantify microdomains" in the inital dialog window
 			// this saves time if the experimenter is not interested in plasma membrane microdomains
+	
+			// as descrived above, high-intensity foci in the plasma membrane (ROI circumference) are analyzed in multiple ways, or rather the images are processed by multiple ways before analysis
+			// here, each of the image is loaded and analyzed using the count_foci_from_intensity_profile(window_title,relative_outlier_intensity_threshold) function
+			// foci quantified from intensity profiles
+			count_foci_from_intensity_profile_Gauss = count_foci_from_intensity_profile("DUP_Gauss","Infinity");
+
 			if (microdomains == "yes"){
-				// as descrived above, high-intensity foci in the plasma membrane (ROI circumference) are analyzed in multiple ways, or rather the images are processed by multiple ways before analysis
-				// here, each of the image is loaded and analyzed using the count_foci_from_intensity_profile(window_title,relative_outlier_intensity_threshold) function
-				// foci quantified from intensity profiles
-				count_foci_from_intensity_profile_Gauss = count_foci_from_intensity_profile("DUP_Gauss","Infinity");
 				// calculate the base of the plasma membrane, i.e., the mean intensity of the valleys between fluorescence peaks in the intensity profile
 				base_of_plasma_membrane = plasma_membrane_base_background;
 				count_foci_from_intensity_profile_CLAHE = count_foci_from_intensity_profile("DUP_CLAHE","Infinity");
@@ -524,7 +528,9 @@ function analyze_transversal(file){
 				+ "," + count_foci_from_thresholding_CLAHE[0] + "," + count_foci_from_thresholding_CLAHE[1]
 				+ "," + count_foci_from_thresholding_dotfind[0] + "," + count_foci_from_thresholding_dotfind[1]
 				+ "," + watershed_foci[0] + "," + watershed_foci[1]
-				+ "," + protein_fraction_in_foci
+				+ "," + protein_fraction_in_foci;
+			
+			cell_res = cell_res
 				+ "," + internal_foci_count
 				+ "," + internal_foci_average_size
 				+ "," + internal_foci_total_area;
@@ -597,6 +603,8 @@ function analyze_tangential(file){
 			foci_width_SD = NaN;
 			// if there is at least one microdomain identified by the "Find Maxima..." plugin
 			// make mask from current ROI, setting the threshold based on the intensity of signal in between foci
+			foci = newArray(8);
+			protein_in_foci = NaN;
 			if (number_of_foci > 0){
 				// duplicate current ROI (i.e., cell; actually a rectangle circumscribed to it) from the RAW and CLAHE-processed image with new names: DUP_cell and DUP_cell_CLAHE, respectively
 				select_window(list[i]);
@@ -777,10 +785,12 @@ function print_header(){
 				+ ",foci_threshold_CLAHE,foci_density_threshold_CLAHE"
 				+ ",foci_threshold_dotfind,foci_density_threshold_dotfind"
 				+ ",foci_from_watershed,foci_density_from_watershed"
-				+ ",protein_in_microdomains[%]"
-				+ ",internal_foci_count"
-				+ ",internal_foci_average_size"
-				+ ",internal_foci_total_area";
+				+ ",protein_in_microdomains[%]";
+		
+		column_names = column_names
+			+ ",internal_foci_count"
+			+ ",internal_foci_average_size"
+			+ ",internal_foci_total_area";
 		
 		column_names_profiles = "exp_code,BR_date,"
 			+ naming_scheme + ",mean_background,cell_no"
