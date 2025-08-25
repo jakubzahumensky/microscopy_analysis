@@ -144,6 +144,7 @@ if (matches(process, "Convert Masks to ROIs")){
 	setBatchMode(true);
 	RoiSet_count = count_RoiSet_files(dir, true); // count files that HAVE defines ROIs (i.e., option TRUE is used)
 
+
 if (isOpen("Log") && RoiSet_count > 0){
 		files_with_ROIs = getInfo("Log");
 		if (getBoolean("WARNING!\n"+RoiSet_count+ " of "+ count +" images already have defined sets of ROIs (listed in the Log window).\nDo you wish to overwrite the existing ROI sets?") == 0){
@@ -328,8 +329,8 @@ function map_to_ROIs(file){
 		File.rename(tempDir, masksDir);
 	if (File.exists(masksDir + title + mask_suffix)){
 		core_title = prepare(file);
-		run("Clear Results");
-		run("Measure");
+//		run("Clear Results");
+//		run("Measure");
 		open(masksDir + title + mask_suffix);
 		roiManager("reset"); // clear ROI manager of anything that might be there from previous work
 		run("LabelMap to ROI Manager (2D)");  // for each object in the masks map a ROI is made and put into ROI manager
@@ -475,8 +476,9 @@ function ROI_check(file, k){
 	shift_x = 0;
 	shift_y = 0;
 	size_threshold = 0;
+	intensity_threshold = 0;
 	// as long as at least one of the resize and shift parameters are non-zero, show the dialog window
-	while ((size_change != 0) || (shift_x != 0) || (shift_y != 0) || (size_threshold != 0)){
+	while ((size_change != 0) || (shift_x != 0) || (shift_y != 0) || (size_threshold != 0) || (intensity_threshold != 0)){
 		Dialog.createNonBlocking("Check and adjust ROIs");
 			if (blind == "yes"){
 				dir_name = "hidden";
@@ -484,10 +486,11 @@ function ROI_check(file, k){
 			}
 			Dialog.addMessage("Stats:\nfolder: \"" + grandparent_name + "/" + parent_name + "/" + dir_name + "\"" + "\nimage counter: " + i+1 + "/" + list.length + " (" + counter + "/" + count +" total)", 14);
 			Dialog.addMessage("Adjust all " + numROIs + " ROIs", 12);
-			Dialog.addNumber("Enlarge (neg. values shrink):", 0, 0, 2, "px");
-			Dialog.addNumber("Move right (neg. values move left)", 0, 0, 2, "px");
-			Dialog.addNumber("Move down (neg. values move up)", 0, 0, 2, "px");
-			Dialog.addNumber("Remove all ROIs with area smaller than", 0, 0, 2, "um^2");
+			Dialog.addNumber("Enlarge by (neg. values shrink)", 0, 0, 2, "px");
+			Dialog.addNumber("Move right by (neg. values move left)", 0, 0, 2, "px");
+			Dialog.addNumber("Move down by (neg. values move up)", 0, 0, 2, "px");
+			Dialog.addNumber("Remove ROIs with area smaller than", 0, 0, 2, "um^2");
+			Dialog.addNumber("Remove ROIs with I_mean greater than", 0, 0, 2, "");
 		   	Dialog.addNumber("Jump forward by (neg. values jump back)", 0, 0, 2, "images");
 		   	Dialog.addCheckbox("Exclude current image from analysis", false);
 		   	Dialog.addMessage("Click \"Help\" for more information on the parameters.");
@@ -498,6 +501,7 @@ function ROI_check(file, k){
 			shift_x = Dialog.getNumber();
 			shift_y = Dialog.getNumber();
 			size_threshold = Dialog.getNumber();
+			intensity_threshold = Dialog.getNumber();
 			jump = Dialog.getNumber();
 			exclude = Dialog.getCheckbox();
 
@@ -532,13 +536,24 @@ function ROI_check(file, k){
 			numROIs = roiManager("count");
 			for(j = numROIs-1; j >= 0 ; j--){
 				roiManager("Select", j);
-				run("Clear Results");
-				run("Measure");
-				if (getResult("Area", 0) < size_threshold){
+				getStatistics(ROI_area, ROI_mean, ROI_min, ROI_max, ROI_std, ROI_histogram);
+				if (ROI_area < size_threshold){
 					roiManager("Select", j);
 					roiManager("Delete");
 				}
 			close("Results");
+			}
+		}
+		
+		if (intensity_threshold != 0){
+			numROIs = roiManager("count");
+			for(j = numROIs-1; j >= 0 ; j--){
+				roiManager("Select", j);
+				getStatistics(ROI_area, ROI_mean, ROI_min, ROI_max, ROI_std, ROI_histogram);
+				if (ROI_mean > intensity_threshold){
+					roiManager("Select", j);
+					roiManager("Delete");
+				}
 			}
 		}
 		// remove information about the ROIs that would tie them to a specific channel/slice/time frame. This way, same ROIs can be used in all channels, slices etc.
