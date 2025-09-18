@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE)
 
 Install and load required packages
 
-```{r}
+```{r "Create a list ofrequired packages"}
 # the following packages are required for:
 # 'data.table' - work with data tables (enhanced version of the data.frame)
 # 'dplyr' - the %>% piping tool and summarise() function
@@ -26,13 +26,12 @@ Install and load required packages
 
 required_packages <- c("here", "knitr", "glue", "data.table", "dplyr", 
                        "svDialogs", "ggplot2", "ggstatsplot", "car", "rstatix", "multcomp", "tidyr")
+
+# install missing required packages
 new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
 if (length(new_packages))
    install.packages(new_packages, dependencies = TRUE)
-```
 
-
-```{r}
 # load all required packages
 for (PACKAGE in required_packages){
     library(PACKAGE, character.only = TRUE)
@@ -73,13 +72,16 @@ Extract channel number from file name. From the column names, we extract the nam
 # channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
 # in the following code, the regexpr() function returns position and length of the substring, the regmatches() function extracts the actual substring
 channel <- regmatches(results_file, regexpr("channel [0-9]", results_file))
+if (length(channel) == 0)
+  channel_no <- dlg_input(message = "Input channel number for which analysis was performed:", default = "1", gui = .GUI)$res
+  channel <- glue("channel {channel_no}")
+  
 data_table <- data.table(read.csv(file = results_file, header = TRUE, sep = ",", quote = "", dec = ".", comment.char = "#"))
 
 # Rename 'control' to '_control'; this way the control sample appears first (leftmost) in the graphs and analyses
 for (col in names(data_table))
   set(data_table, i = which(data_table[[col]] == "control"), j = col, value = "_control")
 ```
-
 
 ```{r "Sort columns into descriptive and quantified parameters"}
 # Find the position of the 'frame' column
@@ -130,6 +132,9 @@ for (EXP in unique(data_table$exp_code)){
   pdf_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/pdf_boxplots"))
   if (!file.exists(pdf_dir))
     dir.create(pdf_dir)
+  tables_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/summary_tables"))
+  if (!file.exists(tables_dir))
+    dir.create(tables_dir)
 }
 ```
 
@@ -192,7 +197,8 @@ for (EXP in unique(data_table$exp_code)){
     subset_columns <- c("BR_date", parameters, COL)
     summary_subset <- summary[, ..subset_columns]
     summary_wide <- reshape(summary_subset, idvar = parameters, timevar = "BR_date", direction = "wide")
-    out_file <- glue("/analysis/{EXP}/{channel}/{COL}.xlsx")
+    out_file <- glue("/analysis/{EXP}/{channel}/summary_tables/{COL}.xlsx")
+#    out_file <- glue("{tables_dir}/{COL}.xlsx")
 #writexl::write_xlsx(as.data.frame(summary_wide), path = here("", out_file))
     writexl::write_xlsx(as.data.frame(summary_wide), path = workingDir + out_file)
   }
