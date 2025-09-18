@@ -194,7 +194,8 @@ function contains(array, value){
 
 function processFile(q){
 	prepareFolders();
-	open(q);
+//	open(q);
+	run("Bio-Formats (Windowless)", "open=[" + q + "]");
 	rename(image_name);
 	removeBlackSlices();
 	correctDriftAndBleaching();
