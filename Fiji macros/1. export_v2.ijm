@@ -93,7 +93,7 @@ function processFolder(dir){
 			processFolder("" + dir + list[i]);
 		else {
 			if (endsWith(dir, data_dir)){
-				q = dir+list[i];
+				q = dir + list[i];
 				// store file extension of file "q" into the "ext" variable
 				extIndex = lastIndexOf(q, ".");
 				ext = substring(q, extIndex + 1);
@@ -119,7 +119,8 @@ function contains(array, value){
 /* following operations are performed with each image that is opened */
 function processFile(q){
 	prepareFolders();
-	open(q);
+//	open(q);
+	run("Bio-Formats (Windowless)", "open=[" + q + "]");
 	substack();
 	adjustContrast();
 	saveAs(output_format, export_dir + list[i]);
