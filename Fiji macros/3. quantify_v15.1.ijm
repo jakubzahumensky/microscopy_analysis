@@ -226,14 +226,7 @@ function process_folder(dir){
 					ext = substring(file, extIndex + 1);
 					// process file if its extension corresponds to any of those stored in the "extension_list" variable
 					if (array_contains(extension_list, ext)){
-						// inform user about the progress of the analysis
-						print("\\Clear");
-						print("Processing:");
-						print("channel: " + ch + "; user channel input: " + channel);
-						print("file: " + counter + "/" + count-proc_files_number);
-						remaining_time = estimate_remaining_time(ii);
-						print("remaining time (estimate): " + remaining_time[0] + " hour(s), " + round(remaining_time[1]) + " minute(s)");
-						print("(time started/resumed: " + start_year + "-" + String.pad(start_month + 1,2) + "-" + String.pad(start_dayOfMonth,2) + " " + String.pad(start_hour,2) + ":" + String.pad(start_minute,2) + ":" + String.pad(start_second,2)+")");
+						print_status();
 						// perform operations based on the selected image type
 						if (matches(image_type, "transversal")) analyze_transversal(file);
 							else analyze_tangential(file);
@@ -243,6 +236,20 @@ function process_folder(dir){
 		}
 	}
 }
+
+
+function print_status(){
+	/* inform user about the progress of the analysis */
+	print("\\Clear");
+	print("Processing:");
+	print("channel: " + ch + "; user channel input: " + channel);
+	print("file: " + counter + "/" + count-proc_files_number);
+	remaining_time = estimate_remaining_time(ii);
+	print("remaining time (estimate): " + remaining_time[0] + " hour(s), " + round(remaining_time[1]) + " minute(s)");
+	print("(time started/resumed: " + start_year + "-" + String.pad(start_month + 1,2) + "-" + String.pad(start_dayOfMonth,2) + " " + String.pad(start_hour,2) + ":" + String.pad(start_minute,2) + ":" + String.pad(start_second,2)+")");
+
+}
+
 
 // count the files to be analysed and check that all have the channels that the user selected for analysis in the initial Dialog window
 // the general structure of the function is the same as the process_folder() function above
@@ -257,7 +264,8 @@ function count_files(dir){
 				count++;
 				// check that the opened image actually has the channels to be analysed; CHANNEL is a sorted array, i.e., the highest value is the last one
 				// the image needs to be opened for this
-				open(dir + list[i]);
+//				open(dir + list[i]);
+				run("Bio-Formats (Windowless)", "open=[" + dir + list[i] + "]");
 				getDimensions(width, height, channels, slices, frames);
 				// if the number of channels is lower than the number in the last position in the CHANNEL array (i.e., the highers value), cansel macro run and inform user
 				if (channels < CHANNEL[CHANNEL.length-1])
@@ -334,7 +342,8 @@ function check_ROIs(dir, string){
 // Preparatory operations that are required for each image:
 // get the path to ROIs, extract basic parameters of the image: name, bitDepth, dimensions, pixel size, image area
 function prepare(file){
-	open(file);
+//	open(file);
+	run("Bio-Formats (Windowless)", "open=[" + file + "]");
 	rename(list[i]);
 	title = File.nameWithoutExtension;
 	core_title = clean_title(title);
@@ -474,6 +483,7 @@ function analyze_transversal(file){
 			run("Convert to Mask", "background=Dark");
 			foci_mask = "internal foci mask";
 			rename(foci_mask);
+			
 			run("Despeckle");
 			run("Analyze Particles...", "size=0.01225-0.Infinity circularity=0.00-1.00 show=Masks display clear summarize");
 			Table.rename("Summary", "Results");
