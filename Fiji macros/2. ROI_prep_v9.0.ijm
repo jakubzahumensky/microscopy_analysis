@@ -18,6 +18,8 @@
 
 version = "9.0"; // not backward compatible with 8.x versions of ROI_prep and 14.x versions of Quantify macro!
 colour = "red";
+//colour = "cyan";
+
 roiManager("Set Color", colour);
 
 
@@ -48,6 +50,8 @@ var files_with_ROIs = ""; // list of files that do not have defined ROIs
 var overwrite = 1; // overwrite = yes
 var exclude = false; // variable used to mark an image to be excluded from the analysis (the image is moved to a "data-exclude" folder when marked and needs to be recovered maually if desired)
 var jump = 0; // variable used to skip back/ahead during the ROI checking
+var display_min = 0;
+var display_max = 2000;
 var define_manually = false;
 
 var extension_list = newArray("czi", "oif", "lif", "tif", "vsi"); // only files with these extensions will be processed; if your microscopy images are in a different format, add the extension to the list
@@ -303,7 +307,8 @@ function randomize(array){
 // preparatory step where image suffix (extension) is removed from filename. This makes the steps below simpler and more universal.
 // user-specified channel is selected in "color" display mode
 function prepare(file){
-	open(file);
+//	open(file);
+	run("Bio-Formats (Windowless)", "open=[" + file + "]");
 	title = File.nameWithoutExtension();
 	cleaned_title = clean_title(title);
 	getDimensions(width, height, channels, slices, frames);
@@ -345,14 +350,17 @@ function map_to_ROIs(file){
 			for (j = numROIs-1; j >= 0 ; j--){
 				run("Clear Results");
 				roiManager("Select", j);
+
 				run("Measure");
 				Mean = getResult("Mean", 0); // mean intensity value
 				Min = getResult("Min", 0); // minimum intensity value
 				SD = getResult("StdDev", 0); // standard deviation of the mean intensity value
+
 				ROI_width = getResult("Width", 0);
 				ROI_height = getResult("Height", 0);
 				ROI_origin_x = getResult("BX", 0); // x coordinate of the upper left corner
 				ROI_origin_y = getResult("BY", 0);
+
 				ROI_circularity = getResultString("Circ.", 0);
 				too_left = ROI_origin_x < border; // equals 1 for a ROI too close to the left image edge
 				too_high = ROI_origin_y < border; // equals 1 for a ROI too close to the upper image edge
@@ -410,12 +418,14 @@ function ROI_check(file, k){
 	excludeDir = File.getParent(dir) + "/" + replace(File.getName(dir), "data", "data-exclude") + "/";
 	if (blind == "yes")
 		rename(dummy_name);
+	
 	window = getTitle();
 	getDimensions(width, height, channels, slices, frames);
 	dir_name = File.getName(dir);
 	parent = File.getParent(dir);
 	parent_name = File.getName(parent);
 	grandparent_name = File.getName(File.getParent(parent));
+	
 	roiManager("reset");
 	roiManager("Show All with labels");
 	if (File.exists(roiFile))
@@ -425,9 +435,12 @@ function ROI_check(file, k){
 		roiManager("Remove Slice Info");
 		roiManager("Remove Frame Info");
 	numROIs = roiManager("count");
+	
 	selectWindow(window);
 	run("Grays");
+//	run("gem");
 	run("Invert LUT");
+	getStatistics(img_area, img_mean, img_min, img_max, img_std, img_histogram);
 	run("Set... ", "zoom=200 x=0 y=0");
 	setLocation(screenWidth/2 - width - 50, 0, screenWidth*3/4, screenHeight);
 	if (numROIs == 0 && define_manually == true){
@@ -436,7 +449,8 @@ function ROI_check(file, k){
 		waitForUser("Make ROIs by drawing them and pressing 't' \n(or press the 'Add [t]' a button in the ROI manager)\n after each to add them to the ROI manager.");
 	}
 	roiManager("Set Color", colour);
-	run("Enhance Contrast", "saturated=0.5");
+//	setMinAndMax(display_min, display_max);
+
 	if (ellipses == "yes")
 		setTool("ellipse");
 
@@ -477,8 +491,18 @@ function ROI_check(file, k){
 	shift_y = 0;
 	size_threshold = 0;
 	intensity_threshold = 0;
+	display_changed = true;
+//	display_min_new = display_min_old;
+//	display_max_new = display_max_old;
+	
 	// as long as at least one of the resize and shift parameters are non-zero, show the dialog window
-	while ((size_change != 0) || (shift_x != 0) || (shift_y != 0) || (size_threshold != 0) || (intensity_threshold != 0)){
+	while ((size_change != 0) || (shift_x != 0) || (shift_y != 0)
+			|| (size_threshold != 0) || (intensity_threshold != 0) 
+			|| (display_changed)
+			){
+		setMinAndMax(display_min, display_max);
+		display_changed = false;
+		
 		Dialog.createNonBlocking("Check and adjust ROIs");
 			if (blind == "yes"){
 				dir_name = "hidden";
@@ -486,6 +510,8 @@ function ROI_check(file, k){
 			}
 			Dialog.addMessage("Stats:\nfolder: \"" + grandparent_name + "/" + parent_name + "/" + dir_name + "\"" + "\nimage counter: " + i+1 + "/" + list.length + " (" + counter + "/" + count +" total)", 14);
 			Dialog.addMessage("Adjust all " + numROIs + " ROIs", 12);
+			Dialog.addNumber("Set contrast stretch Min:", display_min);
+			Dialog.addNumber("Set contrast stretch Max:", display_max);
 			Dialog.addNumber("Enlarge by (neg. values shrink)", 0, 0, 2, "px");
 			Dialog.addNumber("Move right by (neg. values move left)", 0, 0, 2, "px");
 			Dialog.addNumber("Move down by (neg. values move up)", 0, 0, 2, "px");
@@ -497,6 +523,8 @@ function ROI_check(file, k){
 		   	Dialog.setLocation(screenWidth*3.3/4,screenHeight/7);
 		    Dialog.addHelp(html);
 	    	Dialog.show();
+	    	display_min_new = Dialog.getNumber();
+	    	display_max_new = Dialog.getNumber();
 			size_change = Dialog.getNumber();
 			shift_x = Dialog.getNumber();
 			shift_y = Dialog.getNumber();
@@ -504,6 +532,12 @@ function ROI_check(file, k){
 			intensity_threshold = Dialog.getNumber();
 			jump = Dialog.getNumber();
 			exclude = Dialog.getCheckbox();
+		
+		if ((display_min_new != display_min) || (display_max_new != display_max))
+			display_changed = true;
+		
+		display_min = display_min_new;
+		display_max = display_max_new;
 
 		if (exclude == true){
 			if (!File.exists(excludeDir))
