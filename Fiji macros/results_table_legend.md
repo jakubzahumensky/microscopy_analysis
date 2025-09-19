@@ -83,7 +83,7 @@ The names of the following parameters are set as default in the *Naming scheme* 
 -   **foci_profile_CLAHE** and **foci_density_profile_CLAHE** - analogous to *foci_number* and *foci_density*, but after local contrast enhancement using the built-in CLAHE plugin with he following parameters: "blocksize=8 histogram=64 maximum=3 mask=*None*”
 -   **foci_profile_dotfind** and **foci_density_profile_dotfind** - analogous to *foci_number* and *foci_density*, but after local contrast enhancement performed by filtering the image using a custom-made matrix that makes the high-intensity foci more prominent:
 
-``` math
+$$
 \begin{pmatrix}
  -1 & -1 & -1 & -1 & -1 \\
  -1 & 0 & 0 & 0 & -1 \\
@@ -91,13 +91,16 @@ The names of the following parameters are set as default in the *Naming scheme* 
  -1 & 0 & 0 & 0 & -1 \\
  -1 & -1 & -1 & -1 & -1
  \end{pmatrix}
-```
+$$
 
 -   **foci_threshold_Gauss** and **foci_density_threshold_Gauss** - number of detected high-intensity foci in the plasma membrane that may correspond to microdomains, detected after cell/ROI-limited intensity thresholding after minimal image processing; linear density of these foci (see foci_density above)
 -   **foci_threshold_CLAHE** and **foci_density_threshold_CLAHE** - analogous to *foci_threshold_Gauss* and *foci_density_threshold_Gauss*, but after local contrast enhancement using the built-in CLAHE plugin with he following parameters: "blocksize=8 histogram=64 maximum=3 mask=*None*”
 -   **foci_threshold_dotfind** and **foci_density_threshold_dotfind** - analogous to *foci_threshold_Gauss* and *foci_density_threshold_Gauss*, but after local contrast enhancement performed by filtering the image using the *dotfind* matrix (see above)
 -   **foci_from_watershed** and **foci_density_from_watershed** - analogous to *foci_number* and *foci_density*, but after binarization of the image using the *Watershed Segmentation* plugin developed by *EPFL* (<http://bigwww.epfl.ch/sage/soft/watershed>) with the following settings: “blurring='0.0' watershed='1 1 0 255 1 0' display='2 0'”
 -   **protein_in_microdomains[%]** - an integrated intensity-based estimate of how much of the fluorescent protein in the plasma membrane localizes to microdomains (high-intensity foci)
+-   **internal_foci_count** - the number of high intensity foci found in the cell cytosol
+-   **internal_foci_average_size** - average size of the high intensity foci found in the cell cytosol
+-   **internal_foci_total_area** - total area taken up by the high intensity foci found in the cell cytosol ($count \times average size$)
 
 ------------------------------------------------------------------------
 
