@@ -72,9 +72,10 @@ Extract channel number from file name. From the column names, we extract the nam
 # channel_number <- sub(".*channel ([0-9]+).*", "\\1", results_file)
 # in the following code, the regexpr() function returns position and length of the substring, the regmatches() function extracts the actual substring
 channel <- regmatches(results_file, regexpr("channel [0-9]", results_file))
-if (length(channel) == 0)
+if (length(channel) == 0){
   channel_no <- dlg_input(message = "Input channel number for which analysis was performed:", default = "1", gui = .GUI)$res
   channel <- glue("channel {channel_no}")
+}
   
 data_table <- data.table(read.csv(file = results_file, header = TRUE, sep = ",", quote = "", dec = ".", comment.char = "#"))
 
