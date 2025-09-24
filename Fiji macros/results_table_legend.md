@@ -101,6 +101,8 @@ $$
 -   **internal_foci_count** - the number of high intensity foci found in the cell cytosol
 -   **internal_foci_average_size** - average size of the high intensity foci found in the cell cytosol
 -   **internal_foci_total_area** - total area taken up by the high intensity foci found in the cell cytosol ($count \times average size$)
+-   **internal_foci_I.mean** - mean fluorescence intensity of the internal foci
+-   **internal_foci_I.SD** - standard deviation of the mean fluorescence intensity of the internal foci
 
 ------------------------------------------------------------------------
 
