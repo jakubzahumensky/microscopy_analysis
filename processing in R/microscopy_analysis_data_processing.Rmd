@@ -133,9 +133,15 @@ for (EXP in unique(data_table$exp_code)){
   pdf_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/pdf_boxplots"))
   if (!file.exists(pdf_dir))
     dir.create(pdf_dir)
+  violin_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/violin_plots"))
+  if (!file.exists(violin_dir))
+    dir.create(violin_dir)
   tables_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/summary_tables"))
   if (!file.exists(tables_dir))
     dir.create(tables_dir)
+  stats_dir <- file.path(workingDir, glue("analysis/{EXP}/{channel}/statistics"))
+  if (!file.exists(stats_dir))
+    dir.create(stats_dir)
 }
 ```
 
@@ -390,7 +396,7 @@ for (EXP in unique(data_table$exp_code)){
       if (nchar(terms[2]) > 0)
          fig_width <- fig_width*2
 #      figure_file <- here(glue("analysis/{EXP}/{channel}/{GRAPH}_{FACET}.png"))
-      figure_file <- glue("{workingDir}/analysis/{EXP}/{channel}/{GRAPH}_{FACET}.png") 
+      figure_file <- glue("{workingDir}/analysis/{EXP}/{channel}/violin_plots/{GRAPH}_{FACET}.png") 
       
       ggsave(figure_file, figure, device = "png", width = fig_width, height = fig_height)
     }
@@ -420,7 +426,7 @@ for (EXP in unique(data_table$exp_code)){
       if (length(unique(summary_filtered[[COL]])) > 1){
         p_threshold <- 0.05
 #        out_file_stat <- glue("analysis/{EXP}/{channel}/{COL}_statistical_analysis.txt")
-        out_file_stat <- glue("{workingDir}/analysis/{EXP}/{channel}/{COL}_statistical_analysis.txt")
+        out_file_stat <- glue("{workingDir}/analysis/{EXP}/{channel}/statistics/{COL}_statistical_analysis.txt")
         write(paste0("Statistical analysis report for: ", COL, "\n", "p-adj threshold: ", p_threshold, "\n\n"), file = out_file_stat)
         
         
