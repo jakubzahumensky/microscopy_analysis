@@ -63,7 +63,6 @@ var deconvolved = "no";
 RoiSet_suffix = "-RoiSet.zip";
 initial_folder = "";
 //initial_folder = "D:/Yeast/EXPERIMENTAL/microscopy/_analysis/test/";
-initial_folder = "D:/Yeast/EXPERIMENTAL/microscopy/JZ-M-070-240223 - Atg8 vs eisosome mutants/BY4742/250827 - 30h BR1/";
 
 
 /* definitions of global variables used in the macro below */
@@ -194,8 +193,8 @@ function get_user_input(initial_folder){
 		Dialog.addToSameRow();
 		Dialog.addNumber("to:","Infinity",0,6, fromCharCode(181) + "m^2");
 		Dialog.addNumber("Coefficient of variance (CV) threshold", CV_threshold);
-		Dialog.addChoice("Quantify microdomains:", boolean ,"no");
-		Dialog.addChoice("Deconvolved:", boolean ,"no");
+		Dialog.addChoice("Quantify microdomains:", boolean, "yes");
+		Dialog.addChoice("Deconvolved:", boolean, "no");
 		Dialog.addMessage("Click \"Help\" for more information on the parameters.");
 		Dialog.addHelp(help_message);
 	  Dialog.show();
@@ -829,10 +828,10 @@ function print_results_transversal(){
 	// get the experimental code (grandparent) and biological replicate date (parent)
 	parents = find_parents();
 	// write analysis results for the current ROI into the temporary text file - this is converted into the final Results table at the end of the analysis run
-	cell_res = parents[0] + "," + parents[1] // [0] - experiment code, [1] - biological replicate date
+	cell_res = String.join(parents) // [0] - experiment code, [1] - biological replicate date
 		+ "," + replace(title," ","_") + "," + background + "," + (j+1) // image title, background intensity and current ROI number
-		// in the following three lines: [0] - area, [1] - integrated_intensity, [2] - mean_intensity, [3] - SD, [4] - CV
-		+ "," + cell[0] + "," + cell[1] + "," + cell[2] + "," + cell[3] + "," + cell[4] + "," + cell[5] + "," + cell[6] + "," + cell[7] // [5] - major axis, [6] - minor axis, [7] - eccentricity
+		// in the following three lines: [0] - area, [1] - integrated_intensity, [2] - mean_intensity, [3] - SD, [4] - CV, [5] - major axis, [6] - minor axis, [7] - eccentricity
+		+ "," + String.join(cell)
 		+ "," + cytosol[0] + "," + cytosol[1] + "," + cytosol[2] + "," + cytosol[3] + "," + cytosol[4]
 		+ "," + plasma_membrane[0] + "," + plasma_membrane[1] + "," + plasma_membrane[2] + "," + plasma_membrane[3] + "," + plasma_membrane[4]
 		+ "," + plasma_membrane_DIV_cytosol + "," + plasma_membrane_DIV_cell_integrated + "," + cytosol_DIV_cell_integrated;
@@ -1273,10 +1272,9 @@ function measure_cell_background(){
 /* print measured values into a text window - this ultimately becomes the Results table when the last image is analyzed */
 function print_results_tangential(){
 	parents = find_parents(); // [0] - experiment code, [1] - biological replicate date
-	cell_res = parents[0] + "," + parents[1]
+	cell_res = String.join(parents)
 		+ "," + replace(title," ","_") + "," + background + "," + j+1
-		+ "," + cell[0] + "," + cell[1] + "," + cell[2] + "," + cell[3] + "," + cell[4] // [0] - area, [1] - integrated_intensity, [2] - mean_intensity, [3] - SD, [4] - CV
-		+ "," + cell[5] + "," + cell[6] + "," + cell[7] // [5] - major axis, [6] - minor axis, [7] - eccentricity
+		+ "," + String.join(cell) // [0] - area, [1] - integrated_intensity, [2] - mean_intensity, [3] - SD, [4] - CV, [5] - major axis, [6] - minor axis, [7] - eccentricity
 		+ "," + foci_density_find_maxima + "," + foci_density_analyze_particles + "," + foci_area_fraction
 		+ "," + foci_length + "," + foci_length_SD + "," + foci_width + "," + foci_width_SD + "," + foci_size + "," + foci_size_SD
 		+ "," + foci[2] + "," + foci[3] // [2] - mean intensity; [3] - SD
