@@ -155,7 +155,7 @@ function initialize(){
 	print(RW, "# They are marked with an * and are automatically excluded from graphs and analysis in GraphPad Prism\n");
 	print(RW, "# The other parameters are unaffected by thresholding and are safe to use.\n");
 	print(RW, "#\n");
-	print(RW, "exp_code,BR_date," + naming_scheme + ",background-red_ch,background-green_ch,cell,Pearson,tManders_red_ch,tManders_green-ch,Li(ICQ),Kendall_tau,Spearman,warning\n");
+	print(RW, "exp_code,BR_date," + naming_scheme + ",background-ch1,background-ch2,cell,Pearson,tManders_ch1,tManders_ch2,Li(ICQ),Kendall_tau,Spearman,warning\n");
 }
 
 
