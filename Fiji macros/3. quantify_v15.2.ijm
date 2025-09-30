@@ -413,8 +413,8 @@ function print_column_names(){
 				+ ",protein_in_microdomains[%]";
 
 		column_names = column_names
-			+ ",internal_foci_count" + ",internal_foci_average_size" + ",internal_foci_total_area"
-			+ ",internal_foci_I.mean" + ",internal_foci_I.SD";
+			+ ",internal_foci_count,internal_foci_average_size,internal_foci_total_area"
+			+ ",internal_foci_I.integrated,internal_foci_I.mean,internal_foci_I.SD";
 
 		column_names_profiles = "exp_code,BR_date,"
 			+ naming_scheme + ",mean_background,cell_no"
@@ -633,6 +633,9 @@ function analyze_transversal(file){
 function measure_internal_foci_by_thresholding(){
 	selectWindow(list[i]);
 	roiManager("Select", j);
+	buff = -0.166;
+//	buff = 0;
+	run("Enlarge...", "enlarge=" + buff);
 	run("Duplicate...", "title=DUP_cell duplicate channels=" + ch);
 	run("Duplicate...", "title=DUP_cell_corr duplicate");
 	run("Subtract Background...", "rolling=5 sliding");
@@ -643,7 +646,8 @@ function measure_internal_foci_by_thresholding(){
 	foci_mask = "internal foci mask";
 	rename(foci_mask);
 	run("Despeckle");
-	run("Analyze Particles...", "size=0.02757369844-0.25 circularity=0.7-1.00 show=Masks display clear summarize");
+//	run("Analyze Particles...", "size=0.02757369844-0.35 circularity=0.7-1.00 show=Masks display clear summarize");
+	run("Analyze Particles...", "size=0.01225-0.35 circularity=0.5-1.00 show=Masks display clear summarize");
 	Table.rename("Summary", "Results");
 	internal_foci_count = getResult("Count", 0);
 	internal_foci_average_size = replace(getResult("Average Size", 0), "NaN", 0);
@@ -652,11 +656,12 @@ function measure_internal_foci_by_thresholding(){
 	selectWindow("Mask of " + foci_mask);
 	run("Invert");
 	run("Create Selection");
-	
+//run("Tile");
+//waitForUser(internal_foci_count);
 	selectImage("DUP_cell");
 	run("Restore Selection");
 	getStatistics(internal_foci_area, internal_foci_mean, internal_foci_min, internal_foci_max, internal_foci_std, internal_foci_histogram);
-	returned_list = newArray(internal_foci_count, internal_foci_average_size, internal_foci_total_area, internal_foci_mean, internal_foci_std);
+	returned_list = newArray(internal_foci_count, internal_foci_average_size, internal_foci_total_area, internal_foci_area*internal_foci_mean, internal_foci_mean, internal_foci_std);
 
 	if (internal_foci_mean + internal_foci_std <= ROI_mean - cell[0]){
 		returned_list = newArray(0, 0, 0, 0, 0);
@@ -1014,6 +1019,7 @@ function prepare_image(img_file){
 	bit_depth = bitDepth();
 	getPixelSize(unit, pixelWidth, pixelHeight);
 	Stack.setChannel(ch); // switch to the channel selected by the user
+	run("Enhance Contrast", "saturated=0.1");
 	return core_title;
 }
 
