@@ -292,6 +292,13 @@ for (EXP in unique(data_table$exp_code)){
       plot_title <- paste(plot_title, summary[1, ..col])
   }
   
+##########################################################################################
+  
+#  summary$strain <- factor(summary$strain, levels=c("WT", "pil1D", "lsp1D", "lsp1Dpil1D"))
+  
+##########################################################################################
+  
+  
   # the following graphing works for up to 3 descriptive variables changing within the experiment
   # if more than 3 are changing, the plots will be erroneous (reconsider the experiment design if this is the case)
   descr <- ""
@@ -332,6 +339,12 @@ for (EXP in unique(data_table$exp_code)){
   summary <- get(glue("summary_{EXP}"))
   terms <- get(glue("terms_{EXP}"))
   title_parameters <- get(glue("title_parameters_{EXP}"))
+  
+##########################################################################################
+  
+#  summary$strain <- factor(summary$strain, levels=c("WT", "pil1D", "lsp1D", "lsp1Dpil1D"))
+  
+##########################################################################################
   
   # as different things are analyzed from the tangential and transversal images, so different plots need to be made
   if (grepl("transversal", results_file)) {
