@@ -113,6 +113,7 @@ cat("\nAvailable quantification parameters:\n")
 columns
 ```
 
+
 ## Data filtering and summarization
 
 Since the analysis can be run across multiple experiments, we first need to separate the `Results table` accordingly and save the summary results, graphs and results of statistical analyses into designated folders. First, we make the necessary folders:
@@ -153,6 +154,16 @@ We then group the data based on all possible unique combinations of `experiments
 -   treatment conditions
 
 are optional and only those that are specified are taken into account. The user is asked to select a column according to which the summary tables will be ordered, if multiple choices exist (separately for each experiment). The summary tables are saved and also stored as variables for downstream graphing and statistical analyses.
+
+
+Before proceeding, we need to make sure that the `cultivation times` are treated as categories/strings/text, not as numbers. 
+
+```{r}
+if ("time" %in% colnames(data_table))
+  data_table$time = as.character(data_table$time)
+```
+
+Now we can filter and make graphs.
 
 ```{r "Results table filtering and summarization"}
 for (EXP in unique(data_table$exp_code)){
