@@ -31,6 +31,7 @@ var ch = "";
 var adjust_contrast = false;
 var Min = "";
 var Max = "";
+var gauss_blur = 0;
 
 
 /**************************************************************************************************************/
@@ -58,6 +59,10 @@ function initialDialogWindow(){
 		
 		+"<b>Adjust contrast</b><br>"
 		+"Tick the box and input Min and Max values for the contrast adjustment to take effect. Works for images with bit-depth up to 16. <br><br>"
+		
+		+"<b>Gauss blur diameter</b><br>"
+		+"If a number greater than 0 is used, the images will be blurred (Gauss-filtered) with the specified radius. This is helpful when segmenting noisy images in Cellpose. <br><br>"
+		
 		+"</html>";
 	Dialog.create("Batch export");
 		Dialog.addDirectory("Directory:", "");
@@ -66,7 +71,9 @@ function initialDialogWindow(){
 		Dialog.addNumber("Min:","0");
 		Dialog.addToSameRow();
 		Dialog.addNumber("Max:","65535");
+		Dialog.addNumber("Gauss blur diameter:", gauss_blur);
 		Dialog.addMessage("Click \"Help\" for more information on the parameters.");
+		
 		Dialog.addHelp(help);
 		Dialog.show();
 		dir = replace(Dialog.getString(), "\\", "/");
@@ -74,6 +81,7 @@ function initialDialogWindow(){
 		adjust_contrast = Dialog.getCheckbox();
 		Min = Dialog.getNumber();
 		Max = Dialog.getNumber();
+		gauss_blur = Dialog.getNumber();
 }
 
 
@@ -119,8 +127,9 @@ function contains(array, value){
 /* following operations are performed with each image that is opened */
 function processFile(q){
 	prepareFolders();
-//	open(q);
 	run("Bio-Formats (Windowless)", "open=[" + q + "]");
+	if (gauss_blur > 0)
+		run("Gaussian Blur...", "sigma="+ gauss_blur +"stack");
 	substack();
 	adjustContrast();
 	saveAs(output_format, export_dir + list[i]);
